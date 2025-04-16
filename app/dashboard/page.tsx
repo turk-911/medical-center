@@ -91,7 +91,7 @@ export default function Dashboard() {
         headers: {
           "Content-Type": "application/json",
         },
-                body: JSON.stringify({ ...appointmentData, residentId: user?.id }),
+        body: JSON.stringify(appointmentData),
       });
 
       if (!res.ok) {
