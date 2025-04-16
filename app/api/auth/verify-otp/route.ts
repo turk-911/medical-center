@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { createToken, setTokenCookie } from "@/lib/auth"
-import { prisma } from "@/lib/db" // Assuming you have a Prisma client here
+import { createToken } from "@/lib/auth"
+import { prisma } from "@/lib/db" 
 import { cookies } from "next/headers"
 
 export async function POST(request: Request) {
@@ -14,7 +14,6 @@ export async function POST(request: Request) {
       )
     }
 
-    // 1. Look up the user by email
     const user = await prisma.user.findUnique({
       where: { email },
     })
@@ -26,34 +25,42 @@ export async function POST(request: Request) {
       )
     }
 
-    // 2. Verify OTP and expiry
-    if (user.otp !== otp || user.otpExpiry! < new Date()) {
+    const otpIsExpired = user.otpExpiry && new Date(user.otpExpiry).getTime() < Date.now()
+    if (user.otp !== otp || otpIsExpired) {
       return NextResponse.json(
         { success: false, message: "Invalid or expired OTP" },
         { status: 400 }
       )
     }
 
-    // 3. Clear OTP from DB (optional for security)
     await prisma.user.update({
       where: { email },
       data: { otp: null, otpExpiry: null },
     })
 
-    // 4. Create a JWT token
+
     const token = await createToken({
       userId: user.id,
       email: user.email,
-      userType: user.role, // assuming you have userType field
+      userType: user.role, 
     })
 
-    // 5. Set the token in a cookie
-    cookies().set("token", token, {
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: "Failed to create token" },
+        { status: 500 }
+      )
+    }
+
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      secure: process.env.NODE_ENV === "production",  
+      maxAge: 60 * 60 * 24 * 7, 
       path: "/",
-    })
+    }
+
+    const cookieStore = await cookies()
+    cookieStore.set("auth_token", token, cookieOptions)
 
     return NextResponse.json({
       success: true,

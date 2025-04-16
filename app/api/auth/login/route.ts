@@ -14,31 +14,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: "User not found." }, { status: 404 })
     }
 
-    // Check password
     if (!user.passwordHash) {
       return NextResponse.json({ success: false, message: "Password not set." }, { status: 401 })
     }
 
     const validPassword = await bcrypt.compare(password, user.passwordHash)
-
     if (!validPassword) {
       return NextResponse.json({ success: false, message: "Invalid password." }, { status: 401 })
     }
 
-    // Generate OTP
+    if (user.otp && user.otpExpiry && new Date(user.otpExpiry) > new Date()) {
+      return NextResponse.json({ success: false, message: "OTP already sent and not expired." }, { status: 400 })
+    }
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
     const otpExpiry = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000)
 
-    // Store OTP
     await prisma.user.update({
       where: { email },
-      data: {
-        otp,
-        otpExpiry,
-      },
+      data: { otp, otpExpiry },
     })
 
-    // Send OTP via email
     await sendEmail({
       to: email,
       subject: "Your OTP Code",
