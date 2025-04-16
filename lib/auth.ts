@@ -38,7 +38,7 @@ export async function verifyToken(token: string): Promise<AuthPayload | null> {
 }
 
 export function setTokenCookie(token: string) {
-  cookies().set("auth_token", token, {
+  cookies().set("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     path: "/",

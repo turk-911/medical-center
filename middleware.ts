@@ -4,7 +4,7 @@ import { verifyToken } from "./lib/auth"
 
 export async function middleware(request: NextRequest) {
   // Get the token from the cookies
-  const token = request.cookies.get("auth_token")?.value
+  const token = request.cookies.get("token")?.value
 
   // Check if the path requires authentication
   const isAuthPath =

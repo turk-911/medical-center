@@ -5,7 +5,7 @@ import { cookies } from "next/headers"
 
 export async function GET(request: Request) {
   try {
-    const token = (await cookies()).get("auth_token")?.value
+    const token = (await cookies()).get("token")?.value
     const user = token ? await verifyToken(token) : null
 
     if (!user || user.userType !== "resident") {
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
 
 export async function POST(req: Request) {
   try {
-    const token = cookies().get("auth_token")?.value
+    const token = cookies().get("token")?.value
     const userData = token ? await verifyToken(token) : null
 
     if (!userData) {

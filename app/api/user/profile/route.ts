@@ -5,7 +5,7 @@ import { verifyToken } from "@/lib/auth"
 
 export async function GET() {
     try {
-        const token = (await cookies()).get("auth_token")?.value
+        const token = (await cookies()).get("token")?.value
         const userData = token ? await verifyToken(token) : null
 
         if (!userData) {
