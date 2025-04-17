@@ -14,9 +14,9 @@ export async function POST(req: Request) {
       specialty,
       address,
       phone,
-      dept,     
-      section,  
-      rollNo,   
+      dept,
+      section,
+      rollNo,
       course
     } = data
 

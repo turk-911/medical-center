@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -16,6 +16,40 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 
+function StarryBackground() {
+  useEffect(() => {
+    // Animation logic for stars runs only in the browser
+    const createStars = () => {
+      const stars = document.getElementById("stars");
+      if (!stars) return;
+
+      stars.innerHTML = "";
+      const count = 150;
+
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.animationDuration = `${3 + Math.random() * 7}s`;
+        star.style.animationDelay = `${Math.random() * 5}s`;
+        stars.appendChild(star);
+      }
+    };
+
+    createStars();
+  }, []);
+
+  return (
+    <div
+      id="stars-container"
+      className="absolute inset-0 overflow-hidden pointer-events-none"
+    >
+      <div id="stars" className="absolute inset-0" />
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -24,7 +58,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showOtpForm, setShowOtpForm] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -57,7 +91,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleOtpVerify = async (e: React.FormEvent) => {
+  const handleOtpVerify = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -95,57 +129,102 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>Enter your credentials</CardDescription>
+    <div className="flex h-screen items-center justify-center bg-black text-white relative">
+      <style jsx global>{`
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background-color: white;
+          border-radius: 50%;
+          opacity: 0;
+          animation-name: twinkle;
+          animation-iteration-count: infinite;
+        }
+
+        @keyframes twinkle {
+          0% {
+            opacity: 0;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+          }
+        }
+      `}</style>
+
+      <StarryBackground />
+
+      <Card className="w-full max-w-md bg-gray-900 border-gray-800 shadow-xl bg-opacity-90">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center text-white">
+            Login
+          </CardTitle>
+          <CardDescription className="text-gray-400 text-center">
+            Enter your credentials to access your account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {!showOtpForm ? (
             <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <Label>Email</Label>
+              <div className="space-y-2">
+                <Label className="text-gray-300">Email</Label>
                 <Input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   required
+                  className="bg-gray-800 border-gray-700 text-white"
                 />
               </div>
-              <div>
-                <Label>Password</Label>
+              <div className="space-y-2">
+                <Label className="text-gray-300">Password</Label>
                 <Input
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   required
+                  className="bg-gray-800 border-gray-700 text-white"
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                disabled={isLoading}
+              >
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>
           ) : (
             <form onSubmit={handleOtpVerify} className="space-y-4">
-              <div>
-                <Label>OTP</Label>
+              <div className="space-y-2">
+                <Label className="text-gray-300">OTP</Label>
                 <Input
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   required
+                  className="bg-gray-800 border-gray-700 text-white"
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                disabled={isLoading}
+              >
                 {isLoading ? "Verifying..." : "Verify OTP"}
               </Button>
             </form>
           )}
         </CardContent>
         <CardFooter className="justify-center">
-          <p className="text-sm">
-            Don’t have an account?{" "}
-            <Link href="/register" className="text-blue-500 hover:underline">
+          <p className="text-sm text-gray-400">
+            Don't have an account?{" "}
+            <Link
+              href="/register"
+              className="text-indigo-400 hover:text-indigo-300 hover:underline"
+            >
               Register
             </Link>
           </p>

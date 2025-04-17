@@ -15,6 +15,7 @@ import {
 import { StarsBackground } from "@/components/ui/stars-background";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { doctors, facilities } from "@/utils/data";
 
 const ScrollReveal = ({
   children,
@@ -97,14 +98,16 @@ export default function Home() {
             <div className="flex items-center">
               <div className="mr-3">
                 <img
-                  src="/api/placeholder/50/50"
+                  src="/logo.gif"
                   alt="Medical College Logo"
                   className="h-10 w-auto"
                 />
               </div>
               <div>
-                <h1 className="text-white font-bold text-xl">Medical Center</h1>
-                <p className="text-blue-400 text-xs">College of Medicine</p>
+                <h1 className="text-white font-bold text-xl">Health Center</h1>
+                <p className="text-blue-400 text-xs">
+                  Indian Institute of Information Technology, Allahabad
+                </p>
               </div>
             </div>
 
@@ -157,7 +160,7 @@ export default function Home() {
           <div className="flex justify-center mb-8">
             <div className="bg-gray-900/70 p-4 rounded-xl shadow-lg shadow-blue-500/10 backdrop-blur-sm">
               <img
-                src="/api/placeholder/150/150"
+                src="/logo.gif"
                 alt="College of Medicine Logo"
                 className="h-24 w-auto"
               />
@@ -166,7 +169,7 @@ export default function Home() {
 
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-              Medical Center Doctor's Appointment System
+              Health Center Doctor's Appointment
             </h1>
             <p className="mx-auto max-w-[700px] text-gray-300 md:text-xl">
               Book appointments with doctors, manage prescriptions, and check
@@ -216,12 +219,12 @@ export default function Home() {
               <div className="md:w-1/3 text-center md:text-left">
                 <h2 className="text-2xl font-bold text-white mb-4">
                   Affiliated with{" "}
-                  <span className="text-blue-400">College of Medicine</span>
+                  <span className="text-blue-400">United Medicity</span>
                 </h2>
                 <p className="text-gray-300">
-                  Our medical center is proudly affiliated with the prestigious
-                  College of Medicine, ensuring the highest standards of
-                  healthcare education and practice.
+                  Our Health Center is proudly affiliated with the prestigious
+                  United Medicity, ensuring the highest standards of healthcare
+                  education and practice.
                 </p>
                 <Button className="mt-6 bg-blue-600 hover:bg-blue-700 text-white">
                   Learn About Our College
@@ -229,17 +232,19 @@ export default function Home() {
               </div>
 
               <div className="md:w-2/3 grid grid-cols-2 md:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
+                {facilities.map((facility, i) => (
                   <div key={i} className="bg-gray-800 p-4 rounded-lg shadow-md">
                     <img
-                      src="/api/placeholder/100/100"
-                      alt={`College Facility ${i}`}
-                      className="w-full h-auto rounded"
+                      src={facility.image}
+                      alt={facility.title}
+                      className="w-full h-32 object-cover rounded"
                     />
                     <h3 className="text-white font-medium mt-3">
-                      College Facility
+                      {facility.title}
                     </h3>
-                    <p className="text-gray-400 text-sm">Brief description</p>
+                    <p className="text-gray-400 text-sm">
+                      {facility.description}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -332,16 +337,16 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Medical Center Image Section */}
+      {/* Health Center Image Section */}
       <div className="bg-gray-900 py-24 relative z-10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <ScrollReveal className="lg:w-1/2">
               <div className="rounded-lg overflow-hidden shadow-xl shadow-blue-500/10">
                 <img
-                  src="/api/placeholder/800/500"
-                  alt="Modern Medical Center Facility"
-                  className="w-full h-auto object-cover"
+                  src="logo.gif"
+                  alt="Modern Health Center Facility"
+                  className="w-auto h-auto object-cover"
                 />
               </div>
             </ScrollReveal>
@@ -351,7 +356,7 @@ export default function Home() {
                 State-of-the-Art Medical Facility
               </h2>
               <p className="text-gray-300">
-                Our medical center is equipped with cutting-edge technology and
+                Our Health Center is equipped with cutting-edge technology and
                 modern facilities to provide you with the best healthcare
                 experience. Our team of expert doctors and medical professionals
                 are committed to delivering high-quality care in a comfortable
@@ -434,21 +439,21 @@ export default function Home() {
           </ScrollReveal>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {[1, 2, 3, 4].map((i) => (
+            {doctors.map((doctor, i) => (
               <ScrollReveal key={i}>
                 <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-blue-500/20 transition-all duration-300 group">
                   <div className="aspect-square overflow-hidden">
                     <img
-                      src={`/api/placeholder/300/300`}
-                      alt={`Doctor ${i} - Specialist`}
+                      src={doctor.image}
+                      alt={`${doctor.name} - ${doctor.specialization}`}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-4 text-center">
                     <h3 className="text-white font-medium text-lg">
-                      Dr. Name Here
+                      {doctor.name}
                     </h3>
-                    <p className="text-blue-400">Specialization</p>
+                    <p className="text-blue-400">{doctor.specialization}</p>
                   </div>
                 </div>
               </ScrollReveal>
@@ -558,7 +563,7 @@ export default function Home() {
                 className="h-16 w-auto mr-4"
               />
               <div>
-                <h3 className="text-white text-xl font-bold">Medical Center</h3>
+                <h3 className="text-white text-xl font-bold">Health Center</h3>
                 <p className="text-blue-400">College of Medicine</p>
               </div>
             </div>
@@ -657,7 +662,7 @@ export default function Home() {
                 <li className="flex items-start">
                   <MapPin className="h-5 w-5 text-blue-400 mr-2 mt-0.5" />
                   <span>
-                    123 Medical Center Drive, Healthcare City, HC 12345
+                    123 Health Center Drive, Healthcare City, HC 12345
                   </span>
                 </li>
                 <li className="flex items-center">
@@ -686,7 +691,7 @@ export default function Home() {
 
           <div className="border-t border-gray-800 mt-12 pt-8 text-center">
             <p>
-              &copy; {new Date().getFullYear()} Medical Center - College of
+              &copy; {new Date().getFullYear()} Health Center - College of
               Medicine. All rights reserved.
             </p>
           </div>
