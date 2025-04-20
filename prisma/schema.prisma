@@ -101,7 +101,7 @@ model OnLeave {
 }
 
 model Appointment {
-  id            Int            @id @default(autoincrement())  
+  id            Int            @id @default(autoincrement())
   date          DateTime
   timeSlot      String
   status        String         @default("upcoming")
@@ -115,21 +115,35 @@ model Appointment {
 
 model Medicine {
   id            Int            @id @default(autoincrement())
-  name          String
+  name          String         @unique
   quantity      Int
   unit          String
   addedOn       DateTime       @default(now())
   updatedOn     DateTime       @updatedAt
-  prescriptions Prescription[]
+  prescriptions PrescriptionMedicine[]
 }
 
 model Prescription {
-  id            Int         @id @default(autoincrement())
+  id            Int                    @id @default(autoincrement())
   appointmentId Int
+  description   String? 
+  dosage        String?     
+  duration      String?    
+  frequency     String? 
+  appointment   Appointment            @relation(fields: [appointmentId], references: [id])
+  medicines     PrescriptionMedicine[]
+}
+
+
+model PrescriptionMedicine {
+  id            Int       @id @default(autoincrement())
+  prescriptionId Int
   medicineId    Int
   quantity      Int
-  appointment   Appointment @relation(fields: [appointmentId], references: [id])
-  medicine      Medicine    @relation(fields: [medicineId], references: [id])
+  prescription  Prescription @relation(fields: [prescriptionId], references: [id])
+  medicine      Medicine     @relation(fields: [medicineId], references: [id])
+
+  @@unique([prescriptionId, medicineId])
 }
 
 model Admin {
