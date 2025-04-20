@@ -8,21 +8,22 @@ datasource db {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  email        String    @unique
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
   name         String?
   role         Role
   otp          String?
   otpExpiry    DateTime?
   passwordHash String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   Resident     Resident?
   Doctor       Doctor?
   Faculty      Faculty?
   Staff        Staff?
   Student      Student?
   Admin        Admin?
+  Appointment  Appointment[]
 }
 
 enum Role {
@@ -35,13 +36,12 @@ enum Role {
 }
 
 model Resident {
-  id          Int           @id @default(autoincrement())
-  name        String
-  address     String?
-  phone       String?
-  userId      Int           @unique
-  user        User          @relation(fields: [userId], references: [id])
-  Appointment Appointment[]
+  id      Int     @id @default(autoincrement())
+  name    String
+  address String?
+  phone   String?
+  userId  Int     @unique
+  user    User    @relation(fields: [userId], references: [id])
 }
 
 model Faculty {
@@ -67,15 +67,18 @@ model Student {
 }
 
 model Doctor {
-  id           Int            @id @default(autoincrement())
-  name         String
-  specialty    String
-  userId       Int            @unique
-  user         User           @relation(fields: [userId], references: [id])
-  Appointment  Appointment[]
-  Availability Availability[]
-  leaves        OnLeave[] @relation("DoctorLeaves")
-  substitutions OnLeave[] @relation("DoctorSubstitute")
+  id            Int            @id @default(autoincrement())
+  name          String
+  specialty     String
+  rating        Float          @default(4.8)
+  availability  String         @default("Today")
+  image         String         @default("/api/placeholder/64/64")
+  userId        Int            @unique
+  user          User           @relation(fields: [userId], references: [id])
+  leaves        OnLeave[]      @relation("DoctorLeaves")
+  substitutions OnLeave[]      @relation("DoctorSubstitute")
+  Availability  Availability[]
+  Appointment   Appointment[]
 }
 
 model Availability {
@@ -88,49 +91,49 @@ model Availability {
 }
 
 model OnLeave {
-  id       Int      @id @default(autoincrement())
-  fromDate DateTime
-  toDate   DateTime
+  id           Int      @id @default(autoincrement())
+  fromDate     DateTime
+  toDate       DateTime
   doctorId     Int
   substituteId Int
-  doctor     Doctor @relation("DoctorLeaves", fields: [doctorId], references: [id])
-  substitute Doctor @relation("DoctorSubstitute", fields: [substituteId], references: [id])
+  doctor       Doctor   @relation("DoctorLeaves", fields: [doctorId], references: [id])
+  substitute   Doctor   @relation("DoctorSubstitute", fields: [substituteId], references: [id])
 }
 
 model Appointment {
-  id          Int      @id @default(autoincrement())
-  date        DateTime
-  timeSlot    String
-  status      String   @default("upcoming")
-  description String?
-  doctorId    Int
-  residentId  Int
-  doctor   Doctor   @relation(fields: [doctorId], references: [id])
-  resident Resident @relation(fields: [residentId], references: [id])
+  id            Int            @id @default(autoincrement())  
+  date          DateTime
+  timeSlot      String
+  status        String         @default("upcoming")
+  description   String?
+  doctorId      Int
+  userId        Int
+  doctor        Doctor         @relation(fields: [doctorId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
   prescriptions Prescription[]
 }
 
 model Medicine {
-  id        Int      @id @default(autoincrement())
-  name      String
-  quantity  Int
-  unit      String
-  addedOn   DateTime @default(now())
-  updatedOn DateTime @updatedAt
+  id            Int            @id @default(autoincrement())
+  name          String
+  quantity      Int
+  unit          String
+  addedOn       DateTime       @default(now())
+  updatedOn     DateTime       @updatedAt
   prescriptions Prescription[]
 }
 
 model Prescription {
-  id            Int @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   appointmentId Int
   medicineId    Int
   quantity      Int
-  appointment Appointment @relation(fields: [appointmentId], references: [id])
-  medicine    Medicine    @relation(fields: [medicineId], references: [id])
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  medicine      Medicine    @relation(fields: [medicineId], references: [id])
 }
 
 model Admin {
-  id     Int    @id @default(autoincrement())
-  userId Int    @unique
-  user   User   @relation(fields: [userId], references: [id])
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
 }

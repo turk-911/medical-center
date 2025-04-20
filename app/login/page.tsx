@@ -107,9 +107,17 @@ export default function LoginPage() {
         toast({ title: "Login Success", description: "Redirecting..." });
         console.log("Redirect to:", data.userType);
 
+        console.log(data);
+
+        console.log(data.userType);
+
         if (data.userType === "doctor") router.push("/doctor/dashboard");
         else if (data.userType === "admin") router.push("/admin/dashboard");
-        else router.push("/dashboard");
+        else if (data.userType === "student") router.push("/dashboard/patient");
+        else {
+          console.log("Esle");
+          router.push("/dashboard/patient");
+        }
       } else {
         toast({
           variant: "destructive",

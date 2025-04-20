@@ -1,108 +1,156 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Calendar } from "@/components/ui/calendar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
-import { ArrowLeft, CalendarIcon, Clock } from "lucide-react"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
+import { ArrowLeft, CalendarIcon, Clock } from "lucide-react";
+import { format } from "date-fns";
 
 interface Doctor {
-  id: number
-  name: string
-  specialization: string
-  availableDays: string[]
+  id: number;
+  name: string;
+  specialization: string;
 }
 
 interface BookAppointmentProps {
-  doctor: Doctor
-  onComplete: () => void
-  onCancel: () => void
+  doctor: Doctor;
+  onComplete: () => void;
+  onCancel: () => void;
 }
 
-export default function BookAppointment({ doctor, onComplete, onCancel }: BookAppointmentProps) {
-  const [date, setDate] = useState<Date | undefined>(undefined)
-  const [timeSlot, setTimeSlot] = useState("")
-  const [reason, setReason] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export default function BookAppointment({
+  doctor,
+  onComplete,
+  onCancel,
+}: BookAppointmentProps) {
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [timeSlot, setTimeSlot] = useState("");
+  const [reason, setReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const dayOfWeek = (date: Date) => {
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-    return days[date.getDay()]
-  }
+  const [availableDays] = useState<string[]>([
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+  ]);
 
-  const isDateAvailable = (date: Date) => {
-    const day = dayOfWeek(date)
-    return doctor.availableDays.includes(day)
-  }
+  useEffect(() => {
+    if (!date) {
+      setAvailableSlots([]);
+      return;
+    }
 
-  const timeSlots = [
-    "9:00 AM",
-    "9:30 AM",
-    "10:00 AM",
-    "10:30 AM",
-    "11:00 AM",
-    "11:30 AM",
-    "12:00 PM",
-    "2:00 PM",
-    "2:30 PM",
-    "3:00 PM",
-    "3:30 PM",
-    "4:00 PM",
-  ]
+    const fetchAvailableSlots = async () => {
+      setIsLoadingSlots(true);
+      setFetchError(null);
+      setAvailableSlots([]);
+
+      try {
+        const formattedDate = format(date, "yyyy-MM-dd");
+
+        // ✅ Correct API path
+        const response = await fetch(
+          `/api/doctors/${doctor.id}/available_slots?date=${formattedDate}`
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch available slots");
+
+        const data = await response.json();
+
+        if (data.success) {
+          setAvailableSlots(data.availableSlots || []);
+          if (data.message) setFetchError(data.message);
+        } else {
+          setFetchError(data.message || "Failed to load available slots");
+        }
+      } catch (error) {
+        console.error("Error fetching available slots:", error);
+        setFetchError("Failed to load available time slots");
+      } finally {
+        setIsLoadingSlots(false);
+      }
+    };
+
+    fetchAvailableSlots();
+  }, [date, doctor.id]);
+
+  const isDateAvailable = (date: Date | undefined) => {
+    if (!date) return false;
+    const day = format(date, "EEEE");
+    return availableDays.includes(day);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!date || !timeSlot) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Please select both date and time for your appointment.",
-      })
-      return
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/appointments", {
+      const response = await fetch("/api/appointments/book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           doctorId: doctor.id,
-          date: date.toISOString().split("T")[0],
+          date: format(date, "yyyy-MM-dd"),
           timeSlot,
-          reason,
+          description: reason,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Booking failed")
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Booking failed");
       }
 
       toast({
         title: "Appointment Booked",
-        description: `Your appointment with ${doctor.name} on ${date.toLocaleDateString()} at ${timeSlot} has been booked.`,
-      })
+        description: `Your appointment with Dr. ${doctor.name} on ${format(
+          date,
+          "MMMM d, yyyy"
+        )} at ${timeSlot} has been booked.`,
+      });
 
-      onComplete()
+      onComplete();
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to book appointment. Please try again.",
-      })
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to book appointment. Please try again.",
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -111,7 +159,9 @@ export default function BookAppointment({ doctor, onComplete, onCancel }: BookAp
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
         </Button>
-        <h3 className="font-medium">Book Appointment with {doctor.name}</h3>
+        <h3 className="font-medium">
+          Book Appointment with Dr. {doctor?.name || "Doctor"}
+        </h3>
       </div>
 
       <Card>
@@ -125,19 +175,19 @@ export default function BookAppointment({ doctor, onComplete, onCancel }: BookAp
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={setDate}
+                onSelect={(newDate) => {
+                  setDate(newDate);
+                  setTimeSlot("");
+                }}
                 disabled={(date) => {
-                  // Disable past dates
-                  const today = new Date()
-                  today.setHours(0, 0, 0, 0)
-
-                  // Disable dates when doctor is not available
-                  return date < today || !isDateAvailable(date)
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  return date < today || !isDateAvailable(date);
                 }}
                 className="rounded-md border"
               />
               <div className="text-xs text-muted-foreground">
-                <p>Doctor is available on: {doctor.availableDays.join(", ")}</p>
+                <p>Doctor is available on: {availableDays.join(", ")}</p>
               </div>
             </div>
 
@@ -147,18 +197,38 @@ export default function BookAppointment({ doctor, onComplete, onCancel }: BookAp
                 <h4 className="font-medium">Select Time</h4>
               </div>
 
-              <Select disabled={!date} value={timeSlot} onValueChange={setTimeSlot}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select time slot" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeSlots.map((slot) => (
-                    <SelectItem key={slot} value={slot}>
-                      {slot}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {isLoadingSlots ? (
+                <div className="text-sm text-muted-foreground">
+                  Loading available slots...
+                </div>
+              ) : (
+                <Select
+                  disabled={!date || availableSlots.length === 0}
+                  value={timeSlot}
+                  onValueChange={setTimeSlot}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        availableSlots.length === 0
+                          ? "No available slots"
+                          : "Select time slot"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableSlots.map((slot) => (
+                      <SelectItem key={slot} value={slot}>
+                        {slot}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              {fetchError && (
+                <div className="text-xs text-destructive">{fetchError}</div>
+              )}
 
               <div className="space-y-2">
                 <h4 className="font-medium text-sm">Reason for Visit</h4>
@@ -170,7 +240,11 @@ export default function BookAppointment({ doctor, onComplete, onCancel }: BookAp
                 />
               </div>
 
-              <Button className="w-full mt-4" disabled={!date || !timeSlot || isSubmitting} onClick={handleSubmit}>
+              <Button
+                className="w-full mt-4"
+                disabled={!date || !timeSlot || isSubmitting}
+                onClick={handleSubmit}
+              >
                 {isSubmitting ? "Booking..." : "Book Appointment"}
               </Button>
             </div>
@@ -178,5 +252,5 @@ export default function BookAppointment({ doctor, onComplete, onCancel }: BookAp
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

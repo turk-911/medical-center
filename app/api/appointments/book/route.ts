@@ -1,16 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
+import { parseISO } from "date-fns";
 
 export async function POST(req: NextRequest) {
   try {
+    console.log("📥 Booking appointment...");
+
     const token = req.cookies.get("auth_token")?.value;
+
     if (!token) {
       return NextResponse.json({ success: false, message: "No token provided" }, { status: 401 });
     }
 
     const userData = await verifyToken(token);
-    if (!userData || userData.userType !== "resident") {
+
+    if (!userData || !userData.userId) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 403 });
     }
 
@@ -21,34 +26,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
     }
 
-    const parsedDate = new Date(date);
+    const parsedDate = parseISO(date);
+    const doctorIdNum = typeof doctorId === "string" ? parseInt(doctorId) : doctorId;
 
-    // Check if the time slot is already booked
-    const existing = await prisma.appointment.findFirst({
-      where: {
-        doctorId,
-        date: parsedDate,
-        timeSlot,
-      },
-    });
+    // Check if slot is already booked
+    // const existing = await prisma.appointment.findFirst({
+    //   where: {
+    //     doctorId: doctorIdNum,
+    //     date: parsedDate,
+    //     timeSlot,
+    //   },
+    // });
 
-    if (existing) {
-      return NextResponse.json({ success: false, message: "Time slot already booked" }, { status: 409 });
-    }
+    // if (existing) {
+    //   return NextResponse.json({ success: false, message: "Time slot already booked" }, { status: 409 });
+    // }
 
-    // Get the resident ID
-    const resident = await prisma.resident.findUnique({
-      where: { userId: userData.userId },
-    });
-
-    if (!resident) {
-      return NextResponse.json({ success: false, message: "Resident profile not found" }, { status: 404 });
-    }
-
+    // ✅ Create appointment using connect-by-id pattern
     const appointment = await prisma.appointment.create({
       data: {
-        doctorId,
-        residentId: resident.id,
+        doctor: { connect: { id: doctorIdNum } },
+        user: { connect: { id: userData.userId } },
         date: parsedDate,
         timeSlot,
         description,
@@ -57,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, appointment });
   } catch (error) {
-    console.error("Appointment booking error:", error);
+    console.error("❌ Appointment booking error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
 }

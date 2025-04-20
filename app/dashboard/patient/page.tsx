@@ -39,6 +39,18 @@ type Appointment = {
   reason?: string;
 };
 
+type Doctor = {
+  id: number;
+  name: string;
+  specialty: string;
+  rating?: number;
+  availability?: string;
+  image?: string;
+  user?: {
+    email: string;
+  };
+};
+
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -50,8 +62,29 @@ export default function Dashboard() {
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [notifications, setNotifications] = useState<number>(3);
 
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    // Fetch user data
+    async function fetchDoctors() {
+      try {
+        const res = await fetch("/api/doctors");
+        const data = await res.json();
+
+        console.log("Fetched doctors", data);
+
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong");
+        }
+        setDoctors(data.doctors);
+      } catch (error) {
+        setError(error as string);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchDoctors();
     const fetchUserData = async () => {
       try {
         const response = await fetch("/api/user/profile");
@@ -64,10 +97,9 @@ export default function Dashboard() {
       }
     };
 
-    // Fetch appointments
     const fetchAppointments = async () => {
       try {
-        const response = await fetch("/api/appointments");
+        const response = await fetch("/api/appointments/");
         if (response.ok) {
           const data = await response.json();
           setAppointments(data.appointments);
@@ -117,7 +149,7 @@ export default function Dashboard() {
         throw new Error("Failed to book appointment");
       }
 
-      await fetchAppointments(); // Ensure appointments are reloaded
+      await fetchAppointments();
     } catch (error) {
       console.error("Booking error:", error);
     }
@@ -132,7 +164,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 bg-cover bg-fixed">
       <div className="container mx-auto px-4 py-8">
-        {/* Header with avatar and notifications */}
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center space-x-4">
             <Avatar className="h-12 w-12 border-2 border-blue-500">
@@ -358,93 +389,60 @@ export default function Dashboard() {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Sample doctors - this would be replaced by DoctorSearch component results */}
-                        {[
-                          {
-                            id: 1,
-                            name: "Dr. Sarah Johnson",
-                            specialty: "Cardiology",
-                            rating: 4.8,
-                            availability: "Today",
-                            image: "/api/placeholder/64/64",
-                          },
-                          {
-                            id: 2,
-                            name: "Dr. Michael Chen",
-                            specialty: "Neurology",
-                            rating: 4.9,
-                            availability: "Tomorrow",
-                            image: "/api/placeholder/64/64",
-                          },
-                          {
-                            id: 3,
-                            name: "Dr. Lisa Williams",
-                            specialty: "Dermatology",
-                            rating: 4.7,
-                            availability: "Today",
-                            image: "/api/placeholder/64/64",
-                          },
-                          {
-                            id: 4,
-                            name: "Dr. Robert Miller",
-                            specialty: "Pediatrics",
-                            rating: 4.9,
-                            availability: "Next Week",
-                            image: "/api/placeholder/64/64",
-                          },
-                        ].map((doctor) => (
-                          <div
-                            key={doctor.id}
-                            className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-all shadow-md hover:shadow-blue-900/20"
-                            onClick={() => handleDoctorSelect(doctor)}
-                          >
-                            <div className="flex items-center space-x-4">
-                              <Avatar className="h-16 w-16 border-2 border-slate-700">
-                                <AvatarImage
-                                  src={doctor.image}
-                                  alt={doctor.name}
-                                />
-                                <AvatarFallback className="bg-blue-600 text-white">
-                                  {doctor.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <h4 className="text-white font-medium">
-                                  {doctor.name}
-                                </h4>
-                                <p className="text-slate-400 text-sm">
-                                  {doctor.specialty}
-                                </p>
-                                <div className="flex items-center mt-1">
-                                  <div className="flex">
-                                    {Array(5)
-                                      .fill(0)
-                                      .map((_, i) => (
-                                        <svg
-                                          key={i}
-                                          className={`w-3.5 h-3.5 ${
-                                            i < Math.floor(doctor.rating)
-                                              ? "text-yellow-400"
-                                              : "text-slate-600"
-                                          }`}
-                                          fill="currentColor"
-                                          viewBox="0 0 20 20"
-                                        >
-                                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                        </svg>
-                                      ))}
+                        {doctors && doctors.length > 0 ? (
+                          doctors.map((doctor) => (
+                            <div
+                              key={doctor.id}
+                              className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-all shadow-md hover:shadow-blue-900/20"
+                              onClick={() => handleDoctorSelect(doctor)}
+                            >
+                              <div className="flex items-center space-x-4">
+                                <Avatar className="h-16 w-16 border-2 border-slate-700">
+                                  <AvatarImage
+                                    src={doctor.image}
+                                    alt={doctor.name}
+                                  />
+                                  <AvatarFallback className="bg-blue-600 text-white">
+                                    {doctor.name
+                                      .split(" ")
+                                      .map((n) => n[0])
+                                      .join("")}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <h4 className="text-white font-medium">
+                                    {doctor.name}
+                                  </h4>
+                                  <p className="text-slate-400 text-sm">
+                                    {doctor.specialty}
+                                  </p>
+                                  <div className="flex items-center mt-1">
+                                    <div className="flex">
+                                      {Array(5)
+                                        .fill(0)
+                                        .map((_, i) => (
+                                          <svg
+                                            key={i}
+                                            className={`w-3.5 h-3.5 ${
+                                              i < Math.floor(doctor.rating)
+                                                ? "text-yellow-400"
+                                                : "text-slate-600"
+                                            }`}
+                                            fill="currentColor"
+                                            viewBox="0 0 20 20"
+                                          >
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                          </svg>
+                                        ))}
+                                    </div>
+                                    <span className="text-slate-400 text-xs ml-1">
+                                      ({doctor.rating})
+                                    </span>
                                   </div>
-                                  <span className="text-slate-400 text-xs ml-1">
-                                    ({doctor.rating})
-                                  </span>
                                 </div>
-                              </div>
-                              <div>
-                                <Badge
-                                  className={`
+                                <div>
+                                  <Badge
+                                    className={`
                   ${
                     doctor.availability === "Today"
                       ? "bg-green-600"
@@ -453,24 +451,27 @@ export default function Dashboard() {
                       : "bg-slate-600"
                   }
                 `}
+                                  >
+                                    {doctor.availability}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="mt-4 pt-3 border-t border-slate-700 flex justify-between items-center">
+                                <span className="text-xs text-slate-400">
+                                  20+ years experience
+                                </span>
+                                <Button
+                                  size="sm"
+                                  className="bg-blue-600 hover:bg-blue-700"
                                 >
-                                  {doctor.availability}
-                                </Badge>
+                                  Book Now
+                                </Button>
                               </div>
                             </div>
-                            <div className="mt-4 pt-3 border-t border-slate-700 flex justify-between items-center">
-                              <span className="text-xs text-slate-400">
-                                20+ years experience
-                              </span>
-                              <Button
-                                size="sm"
-                                className="bg-blue-600 hover:bg-blue-700"
-                              >
-                                Book Now
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
+                          ))
+                        ) : (
+                          <p>No doctors available.</p>
+                        )}
                       </div>
                     </div>
                   )}
