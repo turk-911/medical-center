@@ -13,7 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   CalendarDays,
@@ -27,14 +26,7 @@ import {
 } from "lucide-react";
 import AppointmentList from "@/components/appointment-list";
 import BookAppointment from "@/components/book-appointment";
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  addMonths,
-  subMonths,
-} from "date-fns";
-
+import { format, addMonths, subMonths } from "date-fns";
 
 type Appointment = {
   id: number;
@@ -99,6 +91,7 @@ export default function Dashboard() {
         const response = await fetch("/api/user/profile");
         if (response.ok) {
           const data = await response.json();
+          console.log("Patient", data.user);  
           setUser(data.user);
         }
       } catch (error) {
@@ -171,9 +164,9 @@ export default function Dashboard() {
     return appointments.some((app) => app.date === dateString);
   };
 
-   const selectedDayAppointments = appointments.filter(
-     (a) => a.date === format(selectedDate as Date, "yyyy-MM-dd")
-   );
+  const selectedDayAppointments = appointments.filter(
+    (a) => a.date === format(selectedDate as Date, "yyyy-MM-dd")
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 bg-cover bg-fixed">

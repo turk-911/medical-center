@@ -1,26 +1,25 @@
 import { prisma } from '@/lib/db';
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextResponse } from 'next/server';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'DELETE') {
-    const { prescriptionId } = req.body;
+export async function DELETE(request: Request) {
+  try {
+    const body = await request.json();
+    const { prescriptionId } = body;
 
     if (!prescriptionId) {
-      return res.status(400).json({ message: 'Prescription ID is required' });
+      return NextResponse.json({ message: 'Prescription ID is required' }, { status: 400 });
     }
 
-    try {
-      const deletedPrescription = await prisma.prescription.delete({
-        where: { id: prescriptionId }
-      });
+    const deletedPrescription = await prisma.prescription.delete({
+      where: { id: prescriptionId },
+    });
 
-      return res.status(200).json({ message: 'Prescription deleted successfully', deletedPrescription });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Error deleting prescription' });
-    }
+    return NextResponse.json(
+      { message: 'Prescription deleted successfully', deletedPrescription },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: 'Error deleting prescription' }, { status: 500 });
   }
-
-  res.setHeader('Allow', ['DELETE']);
-  res.status(405).end(`Method ${req.method} Not Allowed`);
 }

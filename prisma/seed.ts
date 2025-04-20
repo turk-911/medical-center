@@ -1,38 +1,64 @@
-const { PrismaClient } = require("@prisma/client");
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Sample availability data
-  await prisma.availability.createMany({
-    data: [
-      // Dr. Sarah Johnson (id: 8)
-      { doctorId: 8, dayOfWeek: "Monday", startTime: "09:00", endTime: "13:00" },
-      { doctorId: 8, dayOfWeek: "Wednesday", startTime: "14:00", endTime: "17:00" },
+  const doctorId = 13;
 
-      // Dr. Michael Chen (id: 9)
-      { doctorId: 9, dayOfWeek: "Tuesday", startTime: "10:00", endTime: "12:00" },
-      { doctorId: 9, dayOfWeek: "Thursday", startTime: "15:00", endTime: "18:00" },
-
-      // Dr. Lisa Williams (id: 10)
-      { doctorId: 10, dayOfWeek: "Monday", startTime: "09:30", endTime: "12:30" },
-      { doctorId: 10, dayOfWeek: "Wednesday", startTime: "10:00", endTime: "14:00" },
-      { doctorId: 10, dayOfWeek: "Friday", startTime: "08:00", endTime: "11:00" },
-
-      // Dr. Robert Miller (id: 11)
-      { doctorId: 11, dayOfWeek: "Tuesday", startTime: "09:00", endTime: "13:00" },
-      { doctorId: 11, dayOfWeek: "Saturday", startTime: "10:00", endTime: "15:00" },
-    ],
+  // Check if doctor exists
+  const doctorExists = await prisma.doctor.findUnique({
+    where: { id: doctorId },
   });
 
-  console.log("✅ Availability seeded successfully!");
+  if (!doctorExists) {
+    console.log('Doctor with ID 16 does not exist. Creating a new doctor...');
+    await prisma.doctor.create({
+      data: {
+        id: doctorId,
+        name: 'Dr. Arshdeep',
+        // Add other necessary fields like email, specialty, etc.
+      },
+    });
+    console.log('Doctor created!');
+  }
+
+  const schedule = [
+    { day: 'Monday', startHour: 9, endHour: 17 },
+    { day: 'Wednesday', startHour: 9, endHour: 17 },
+    { day: 'Friday', startHour: 9, endHour: 17 },
+  ];
+
+  for (const entry of schedule) {
+    const startTime = `${entry.startHour}:00`;
+    const endTime = `${entry.endHour}:00`;
+
+    // Check if availability already exists
+    const exists = await prisma.availability.findMany({
+      where: {
+        doctorId,
+        dayOfWeek: entry.day,
+      },
+    });
+
+    if (exists.length === 0) {
+      await prisma.availability.create({
+        data: {
+          doctorId,
+          dayOfWeek: entry.day,
+          startTime,
+          endTime,
+        },
+      });
+      console.log(`Added availability for ${entry.day}`);
+    } else {
+      console.log(`Availability for ${entry.day} already exists`);
+    }
+  }
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Error seeding availability:", e);
+    console.error(e);
     process.exit(1);
   })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .finally(() => prisma.$disconnect());

@@ -1,37 +1,35 @@
 import { prisma } from '@/lib/db';
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { NextResponse } from 'next/server';
 
-interface GetPrescriptionRequestBody {
-  appointmentId: number; 
-}
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const appointmentIdParam = searchParams.get('appointmentId');
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
-    const { appointmentId }: GetPrescriptionRequestBody = req.query as any;
-
-    if (!appointmentId) {
-      return res.status(400).json({ message: 'Appointment ID is required' });
-    }
-
-    try {
-      const prescription = await prisma.prescription.findMany({
-        where: { appointmentId },
-        include: {
-          medicines: true,
-        },
-      });
-
-      if (!prescription) {
-        return res.status(404).json({ message: 'Prescription not found' });
-      }
-
-      return res.status(200).json({ prescription });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error retrieving prescription' });
-    }
+  if (!appointmentIdParam) {
+    return NextResponse.json({ message: 'Appointment ID is required' }, { status: 400 });
   }
 
-  res.setHeader('Allow', ['GET']);
-  res.status(405).end(`Method ${req.method} Not Allowed`);
+  const appointmentId = parseInt(appointmentIdParam);
+
+  if (isNaN(appointmentId)) {
+    return NextResponse.json({ message: 'Invalid Appointment ID' }, { status: 400 });
+  }
+
+  try {
+    const prescription = await prisma.prescription.findMany({
+      where: { appointmentId },
+      include: {
+        medicines: true,
+      },
+    });
+
+    if (!prescription || prescription.length === 0) {
+      return NextResponse.json({ message: 'Prescription not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ prescription }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: 'Error retrieving prescription' }, { status: 500 });
+  }
 }

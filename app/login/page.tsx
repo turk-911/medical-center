@@ -111,7 +111,7 @@ export default function LoginPage() {
 
         console.log(data.userType);
 
-        if (data.userType === "doctor") router.push("/doctor/dashboard");
+        if (data.userType === "doctor") router.push("/dashboard/doctor");
         else if (data.userType === "admin") router.push("/admin/dashboard");
         else if (data.userType === "student") router.push("/dashboard/patient");
         else {

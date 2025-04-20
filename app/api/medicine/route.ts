@@ -1,56 +1,54 @@
 import { prisma } from '@/lib/db'
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from 'next/server'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+// GET: Fetch all medicines
+export async function GET(req: NextRequest) {
   try {
-    if (req.method === 'GET') {
-      const medicines = await prisma.medicine.findMany()
-      return res.status(200).json(medicines)
-    }
-
-    if (req.method === 'POST') {
-        const { name, quantity, unit } = req.body;
-
-        if (!name || typeof quantity !== 'number' || !unit) {
-          return res.status(400).json({ message: 'Missing or invalid fields' });
-        }
-      
-        try {
-          const existing = await prisma.medicine.findUnique({ where: { name } });
-      
-          if (existing) {
-            const updatedMedicine = await prisma.medicine.update({
-              where: { name },
-              data: {
-                quantity: existing.quantity + quantity,
-                unit,
-              },
-            });
-      
-            return res.status(200).json({
-              message: 'Existing medicine updated',
-              medicine: updatedMedicine,
-            });
-          }
-      
-          const newMedicine = await prisma.medicine.create({
-            data: { name, quantity, unit },
-          });
-      
-          return res.status(201).json({
-            message: 'New medicine added',
-            medicine: newMedicine,
-          });
-        }
-        catch (error) {
-            console.error('Error in POST /api/medicine:', error);
-            return res.status(500).json({ message: 'Internal server error' });
-        }
-    }
-
-    return res.status(405).json({ message: 'Method not allowed' })
+    const medicines = await prisma.medicine.findMany()
+    return NextResponse.json(medicines, { status: 200 })
   } catch (error) {
-    console.error('Error in /api/medicine:', error)
-    return res.status(500).json({ message: 'Internal server error' })
+    console.error('Error in GET /api/medicine:', error)
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// POST: Add or update medicine
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const { name, quantity, unit } = body
+
+    if (!name || typeof quantity !== 'number' || !unit) {
+      return NextResponse.json({ message: 'Missing or invalid fields' }, { status: 400 })
+    }
+
+    const existing = await prisma.medicine.findUnique({ where: { name } })
+
+    if (existing) {
+      const updatedMedicine = await prisma.medicine.update({
+        where: { name },
+        data: {
+          quantity: existing.quantity + quantity,
+          unit,
+        },
+      })
+
+      return NextResponse.json({
+        message: 'Existing medicine updated',
+        medicine: updatedMedicine,
+      }, { status: 200 })
+    }
+
+    const newMedicine = await prisma.medicine.create({
+      data: { name, quantity, unit },
+    })
+
+    return NextResponse.json({
+      message: 'New medicine added',
+      medicine: newMedicine,
+    }, { status: 201 })
+  } catch (error) {
+    console.error('Error in POST /api/medicine:', error)
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
   }
 }

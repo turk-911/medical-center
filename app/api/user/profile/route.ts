@@ -1,16 +1,12 @@
-import { NextApiRequest, NextApiResponse } from "next"
-import { getUserFromToken } from "../../../../lib/auth"
-import { prisma } from "@/lib/db"
+import { NextResponse } from "next/server";
+import { getUserFromToken } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
+export async function GET(req: Request) {
+  const userId = await getUserFromToken();
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ message: "Method Not Allowed" })
-  }
-
-  const userId = await getUserFromToken()
   if (!userId) {
-    return res.status(401).json({ message: "Unauthorized" })
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -26,15 +22,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         Student: true,
         Admin: true,
       },
-    })
+    });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" })
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    res.status(200).json(user)
+    return NextResponse.json({ user }, { status: 200 });
   } catch (error) {
-    console.error("Error fetching user details:", error)
-    res.status(500).json({ message: "Internal Server Error" })
+    console.error("Error fetching user details:", error);
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
