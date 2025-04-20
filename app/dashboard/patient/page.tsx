@@ -26,8 +26,15 @@ import {
   PlusCircle,
 } from "lucide-react";
 import AppointmentList from "@/components/appointment-list";
-import DoctorSearch from "@/components/doctor-search";
 import BookAppointment from "@/components/book-appointment";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  addMonths,
+  subMonths,
+} from "date-fns";
+
 
 type Appointment = {
   id: number;
@@ -64,6 +71,8 @@ export default function Dashboard() {
 
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [error, setError] = useState("");
+
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
   useEffect(() => {
     async function fetchDoctors() {
@@ -102,6 +111,7 @@ export default function Dashboard() {
         const response = await fetch("/api/appointments/");
         if (response.ok) {
           const data = await response.json();
+          console.log("Appointments: ", data);
           setAppointments(data.appointments);
         }
       } catch (error) {
@@ -161,29 +171,33 @@ export default function Dashboard() {
     return appointments.some((app) => app.date === dateString);
   };
 
+   const selectedDayAppointments = appointments.filter(
+     (a) => a.date === format(selectedDate as Date, "yyyy-MM-dd")
+   );
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 bg-cover bg-fixed">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 bg-cover bg-fixed">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center space-x-4">
             <Avatar className="h-12 w-12 border-2 border-blue-500">
               <AvatarImage src={user?.avatarUrl || ""} />
-              <AvatarFallback className="bg-blue-600 text-white">
+              <AvatarFallback className="bg-blue-500 text-white">
                 {user?.name?.charAt(0) || "U"}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-3xl font-bold text-white">
+              <h1 className="text-3xl font-bold text-gray-800">
                 Resident Dashboard
               </h1>
-              <p className="text-slate-300">
+              <p className="text-gray-600">
                 Welcome back, {user?.name || "User"}
               </p>
             </div>
           </div>
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5 text-slate-300" />
+              <Bell className="h-5 w-5 text-gray-600" />
               {notifications > 0 && (
                 <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-xs text-white">
                   {notifications}
@@ -191,7 +205,7 @@ export default function Dashboard() {
               )}
             </Button>
             <Button variant="ghost" size="icon">
-              <Settings className="h-5 w-5 text-slate-300" />
+              <Settings className="h-5 w-5 text-gray-600" />
             </Button>
           </div>
         </div>
@@ -199,9 +213,9 @@ export default function Dashboard() {
         {/* Main content */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Left sidebar */}
-          <Card className="bg-slate-900 bg-opacity-90 border-slate-700 shadow-lg">
-            <CardHeader className="border-b border-slate-700">
-              <CardTitle className="text-lg text-white">
+          <Card className="bg-white border-gray-200 shadow-lg">
+            <CardHeader className="border-b border-gray-200">
+              <CardTitle className="text-lg text-gray-800">
                 Quick Navigation
               </CardTitle>
             </CardHeader>
@@ -239,8 +253,8 @@ export default function Dashboard() {
                     variant={item.active ? "secondary" : "ghost"}
                     className={`w-full justify-start ${
                       item.active
-                        ? "bg-blue-600 hover:bg-blue-700 text-white"
-                        : "text-slate-300 hover:text-white"
+                        ? "bg-blue-500 hover:bg-blue-600 text-white"
+                        : "text-gray-600 hover:text-gray-800"
                     }`}
                   >
                     {item.icon}
@@ -249,36 +263,36 @@ export default function Dashboard() {
                 ))}
               </div>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2 border-t border-slate-700 p-4">
-              <div className="text-xs text-slate-400">
+            <CardFooter className="flex-col items-start gap-2 border-t border-gray-200 p-4">
+              <div className="text-xs text-gray-500">
                 Medical Facility Hours
               </div>
-              <div className="text-sm text-slate-300">
+              <div className="text-sm text-gray-700">
                 Monday - Friday: 8:00 AM - 6:00 PM
                 <br />
                 Saturday: 9:00 AM - 1:00 PM
               </div>
-              <Button variant="link" size="sm" className="text-blue-400 p-0">
+              <Button variant="link" size="sm" className="text-blue-500 p-0">
                 Emergency Contact
               </Button>
             </CardFooter>
           </Card>
 
           {/* Main panel */}
-          <Card className="lg:col-span-2 bg-slate-900 bg-opacity-90 border-slate-700 shadow-lg">
-            <CardHeader className="border-b border-slate-700">
+          <Card className="lg:col-span-2 bg-white border-gray-200 shadow-lg">
+            <CardHeader className="border-b border-gray-200">
               <div className="flex justify-between">
                 <div>
-                  <CardTitle className="text-xl text-white">
+                  <CardTitle className="text-xl text-gray-800">
                     Health Dashboard
                   </CardTitle>
-                  <CardDescription className="text-slate-400">
+                  <CardDescription className="text-gray-500">
                     Manage your appointments and health records
                   </CardDescription>
                 </div>
                 <Button
                   size="sm"
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1"
+                  className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1"
                 >
                   <PlusCircle className="h-4 w-4" />
                   New Appointment
@@ -287,34 +301,34 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="p-6">
               <Tabs defaultValue="appointments" className="w-full">
-                <TabsList className="mb-6 bg-slate-800 p-1">
+                <TabsList className="mb-6 bg-gray-100 p-1">
                   <TabsTrigger
                     value="appointments"
-                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                    className="data-[state=active]:bg-blue-500 data-[state=active]:text-white"
                   >
                     My Appointments
                   </TabsTrigger>
                   <TabsTrigger
                     value="book"
-                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                    className="data-[state=active]:bg-blue-500 data-[state=active]:text-white"
                   >
                     Book Appointment
                   </TabsTrigger>
                   <TabsTrigger
                     value="records"
-                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                    className="data-[state=active]:bg-blue-500 data-[state=active]:text-white"
                   >
                     Health Records
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="appointments">
-                  <div className="bg-slate-800 p-4 rounded-lg mb-4">
+                  <div className="bg-gray-100 p-4 rounded-lg mb-4">
                     <div className="flex justify-between items-center">
-                      <h3 className="text-white font-medium">
+                      <h3 className="text-gray-800 font-medium">
                         Upcoming Appointments
                       </h3>
-                      <Badge className="bg-blue-600 hover:bg-blue-700">
+                      <Badge className="bg-blue-500 hover:bg-blue-600">
                         {isLoading
                           ? "..."
                           : appointments.filter(
@@ -340,9 +354,9 @@ export default function Dashboard() {
                   ) : (
                     // Doctor Search with Enhanced UI
                     <div className="space-y-6">
-                      <div className="bg-slate-800 bg-opacity-70 p-6 rounded-lg border border-slate-700 shadow-md">
-                        <h3 className="text-lg font-medium text-white mb-4 flex items-center">
-                          <User className="h-5 w-5 mr-2 text-blue-400" />
+                      <div className="bg-gray-100 bg-opacity-70 p-6 rounded-lg border border-gray-200 shadow-md">
+                        <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
+                          <User className="h-5 w-5 mr-2 text-blue-500" />
                           Find a Specialist
                         </h3>
 
@@ -350,9 +364,9 @@ export default function Dashboard() {
                           <input
                             type="text"
                             placeholder="Search by name, specialty or department..."
-                            className="w-full bg-slate-900 border border-slate-700 rounded-md p-3 pl-10 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                            className="w-full bg-white border border-gray-300 rounded-md p-3 pl-10 text-gray-800 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                           />
-                          <div className="absolute left-3 top-3.5 text-slate-500">
+                          <div className="absolute left-3 top-3.5 text-gray-400">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               width="16"
@@ -380,7 +394,7 @@ export default function Dashboard() {
                           ].map((specialty) => (
                             <Badge
                               key={specialty}
-                              className="bg-slate-700 hover:bg-blue-600 cursor-pointer transition-colors px-3 py-1.5"
+                              className="bg-gray-200 hover:bg-blue-500 hover:text-white cursor-pointer transition-colors px-3 py-1.5 text-gray-700"
                             >
                               {specialty}
                             </Badge>
@@ -393,16 +407,16 @@ export default function Dashboard() {
                           doctors.map((doctor) => (
                             <div
                               key={doctor.id}
-                              className="bg-slate-800 border border-slate-700 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-all shadow-md hover:shadow-blue-900/20"
+                              className="bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-all shadow-md hover:shadow-blue-100"
                               onClick={() => handleDoctorSelect(doctor)}
                             >
                               <div className="flex items-center space-x-4">
-                                <Avatar className="h-16 w-16 border-2 border-slate-700">
+                                <Avatar className="h-16 w-16 border-2 border-gray-200">
                                   <AvatarImage
                                     src={doctor.image}
                                     alt={doctor.name}
                                   />
-                                  <AvatarFallback className="bg-blue-600 text-white">
+                                  <AvatarFallback className="bg-blue-500 text-white">
                                     {doctor.name
                                       .split(" ")
                                       .map((n) => n[0])
@@ -410,10 +424,10 @@ export default function Dashboard() {
                                   </AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1">
-                                  <h4 className="text-white font-medium">
+                                  <h4 className="text-gray-800 font-medium">
                                     {doctor.name}
                                   </h4>
-                                  <p className="text-slate-400 text-sm">
+                                  <p className="text-gray-500 text-sm">
                                     {doctor.specialty}
                                   </p>
                                   <div className="flex items-center mt-1">
@@ -426,7 +440,7 @@ export default function Dashboard() {
                                             className={`w-3.5 h-3.5 ${
                                               i < Math.floor(doctor.rating)
                                                 ? "text-yellow-400"
-                                                : "text-slate-600"
+                                                : "text-gray-300"
                                             }`}
                                             fill="currentColor"
                                             viewBox="0 0 20 20"
@@ -435,7 +449,7 @@ export default function Dashboard() {
                                           </svg>
                                         ))}
                                     </div>
-                                    <span className="text-slate-400 text-xs ml-1">
+                                    <span className="text-gray-500 text-xs ml-1">
                                       ({doctor.rating})
                                     </span>
                                   </div>
@@ -443,26 +457,26 @@ export default function Dashboard() {
                                 <div>
                                   <Badge
                                     className={`
-                  ${
-                    doctor.availability === "Today"
-                      ? "bg-green-600"
-                      : doctor.availability === "Tomorrow"
-                      ? "bg-blue-600"
-                      : "bg-slate-600"
-                  }
-                `}
+                                      ${
+                                        doctor.availability === "Today"
+                                          ? "bg-green-500"
+                                          : doctor.availability === "Tomorrow"
+                                          ? "bg-blue-500"
+                                          : "bg-gray-500"
+                                      }
+                                    `}
                                   >
                                     {doctor.availability}
                                   </Badge>
                                 </div>
                               </div>
-                              <div className="mt-4 pt-3 border-t border-slate-700 flex justify-between items-center">
-                                <span className="text-xs text-slate-400">
+                              <div className="mt-4 pt-3 border-t border-gray-200 flex justify-between items-center">
+                                <span className="text-xs text-gray-500">
                                   20+ years experience
                                 </span>
                                 <Button
                                   size="sm"
-                                  className="bg-blue-600 hover:bg-blue-700"
+                                  className="bg-blue-500 hover:bg-blue-600"
                                 >
                                   Book Now
                                 </Button>
@@ -470,7 +484,7 @@ export default function Dashboard() {
                             </div>
                           ))
                         ) : (
-                          <p>No doctors available.</p>
+                          <p className="text-gray-500">No doctors available.</p>
                         )}
                       </div>
                     </div>
@@ -478,15 +492,15 @@ export default function Dashboard() {
                 </TabsContent>
 
                 <TabsContent value="records">
-                  <div className="bg-slate-800 p-6 rounded-lg text-center">
-                    <FileText className="h-12 w-12 mx-auto text-slate-400 mb-2" />
-                    <h3 className="text-white font-medium mb-2">
+                  <div className="bg-gray-100 p-6 rounded-lg text-center">
+                    <FileText className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                    <h3 className="text-gray-800 font-medium mb-2">
                       Medical Records
                     </h3>
-                    <p className="text-slate-400 mb-4">
+                    <p className="text-gray-500 mb-4">
                       Access and manage your medical history and test results
                     </p>
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button className="bg-blue-500 hover:bg-blue-600 text-white">
                       View Records
                     </Button>
                   </div>
@@ -497,163 +511,152 @@ export default function Dashboard() {
 
           {/* Right sidebar */}
           <div className="space-y-6">
-            <Card className="bg-slate-900 bg-opacity-90 border-slate-700 shadow-lg overflow-hidden">
-              <CardHeader className="border-b border-slate-700">
-                <CardTitle className="text-lg text-white">Calendar</CardTitle>
+            <Card className="bg-white border-gray-200 shadow-lg overflow-hidden">
+              <CardHeader className="border-b border-gray-200 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4">
+                <CardTitle className="text-lg flex items-center">
+                  <CalendarDays className="h-5 w-5 mr-2" />
+                  Your Schedule
+                </CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
+
+              <CardContent className="p-0">
+                {/* Header with month navigation */}
+                <div className="p-4 flex justify-between items-center bg-gray-50 border-b border-gray-200">
+                  <button
+                    className="p-1 rounded-full hover:bg-gray-200"
+                    onClick={() =>
+                      setCurrentMonth((prev) => subMonths(prev, 1))
+                    }
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+                  <h3 className="font-medium text-gray-800">
+                    {format(currentMonth, "MMMM yyyy")}
+                  </h3>
+                  <button
+                    className="p-1 rounded-full hover:bg-gray-200"
+                    onClick={() =>
+                      setCurrentMonth((prev) => addMonths(prev, 1))
+                    }
+                  >
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                </div>
+
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
-                  className="rounded-md border border-slate-700 bg-slate-800"
-                  classNames={{
-                    day_today: "bg-blue-600 text-white",
-                    day_selected: "bg-blue-700 text-slate-50",
-                    day: "hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-50",
-                    day_outside: "text-slate-500 opacity-50",
-                    day_disabled: "text-slate-500",
-                    day_hidden: "invisible",
-                    day_range_middle:
-                      "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                    day_range_end:
-                      "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                    day_range_start:
-                      "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                  }}
+                  month={currentMonth}
+                  onMonthChange={setCurrentMonth}
+                  className="border-none bg-white"
                   modifiers={{
-                    hasAppointment: (date) => getDayWithAppointments(date),
+                    hasAppointment: getDayWithAppointments,
                   }}
                   modifiersClassNames={{
-                    hasAppointment: "border-2 border-green-500",
+                    hasAppointment:
+                      "after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:bg-green-500 after:rounded-full",
+                  }}
+                  classNames={{
+                    day_today: "bg-blue-100 text-blue-700 font-medium",
+                    day_selected:
+                      "bg-blue-600 text-white hover:bg-blue-700 focus:bg-blue-700",
+                    day: "h-9 w-9 p-0 font-normal hover:bg-gray-100 rounded-full flex items-center justify-center",
+                    day_outside: "text-gray-300 opacity-50",
+                    day_disabled: "text-gray-300",
+                    day_hidden: "invisible",
+                    table: "w-full border-collapse",
+                    head_cell: "text-gray-500 font-normal text-xs",
+                    cell: "p-0 relative focus-within:relative focus-within:z-20",
                   }}
                 />
-                <Separator className="my-4 bg-slate-700" />
-                <div>
-                  <h3 className="font-medium mb-3 text-white">
-                    {selectedDate?.toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </h3>
-                  <div className="space-y-2">
+
+                <div className="p-4 bg-white border-t border-gray-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium text-gray-800 flex items-center">
+                      <CalendarDays className="h-4 w-4 mr-2 text-blue-500" />
+                      {format(selectedDate as Date, "EEEE, MMM d")}
+                    </h3>
+                    <Badge className="bg-blue-500">
+                      {isLoading ? "..." : selectedDayAppointments.length}{" "}
+                      events
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
                     {isLoading ? (
-                      <div className="h-24 bg-slate-800 animate-pulse rounded-md"></div>
-                    ) : appointments.filter(
-                        (app) =>
-                          app.date === selectedDate?.toISOString().split("T")[0]
-                      ).length > 0 ? (
-                      appointments
-                        .filter(
-                          (app) =>
-                            app.date ===
-                            selectedDate?.toISOString().split("T")[0]
-                        )
-                        .map((app) => (
-                          <div
-                            key={app.id}
-                            className="flex items-center justify-between text-sm p-3 border border-slate-700 rounded-md bg-slate-800 hover:bg-slate-700 transition-colors"
-                          >
-                            <div className="flex items-center space-x-3">
-                              <div className="p-2 bg-blue-600 rounded-full">
-                                <User className="h-4 w-4 text-white" />
-                              </div>
-                              <div>
-                                <div className="text-white font-medium">
-                                  {app.doctorName}
-                                </div>
-                                <div className="text-slate-400 text-xs">
-                                  {app.specialization}
-                                </div>
-                              </div>
+                      <div className="h-24 bg-gray-100 animate-pulse rounded-md"></div>
+                    ) : selectedDayAppointments.length > 0 ? (
+                      selectedDayAppointments.map((app) => (
+                        <div
+                          key={app.id}
+                          className="flex items-center justify-between text-sm p-3 border-l-4 border-blue-500 border border-gray-200 rounded-md bg-white hover:bg-blue-50 shadow-sm"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-blue-100 rounded-full">
+                              <User className="h-4 w-4 text-blue-600" />
                             </div>
-                            <div className="flex items-center text-slate-300">
-                              <Clock className="mr-1 h-3 w-3" />
-                              {app.time}
+                            <div>
+                              <div className="text-gray-800 font-medium">
+                                {app.doctorName}
+                              </div>
+                              <div className="text-gray-500 text-xs">
+                                {app.specialization}
+                              </div>
                             </div>
                           </div>
-                        ))
+                          <div className="flex items-center text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
+                            <Clock className="mr-1 h-3 w-3" />
+                            {app.time}
+                          </div>
+                        </div>
+                      ))
                     ) : (
-                      <div className="text-sm text-slate-400 p-4 text-center bg-slate-800 rounded-md">
-                        No appointments on this date
+                      <div className="text-sm text-gray-500 p-6 text-center bg-gray-50 rounded-md border border-dashed border-gray-300 flex flex-col items-center">
+                        <CalendarDays className="h-8 w-8 text-gray-400 mb-2" />
+                        No appointments scheduled
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="mt-2 text-blue-500"
+                        >
+                          + Add Appointment
+                        </Button>
                       </div>
                     )}
                   </div>
                 </div>
               </CardContent>
-            </Card>
-
-            <Card className="bg-slate-900 bg-opacity-90 border-slate-700 shadow-lg">
-              <CardHeader className="border-b border-slate-700">
-                <CardTitle className="text-lg text-white">
-                  Health Stats
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-slate-800 rounded-md border border-slate-700">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-blue-600 rounded-full">
-                        <CalendarDays className="h-4 w-4 text-white" />
-                      </div>
-                      <span className="text-sm text-white">
-                        Upcoming Appointments
-                      </span>
-                    </div>
-                    <Badge className="bg-blue-600">
-                      {isLoading
-                        ? "..."
-                        : appointments.filter(
-                            (app) => app.status === "upcoming"
-                          ).length}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-slate-800 rounded-md border border-slate-700">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-green-600 rounded-full">
-                        <Clock className="h-4 w-4 text-white" />
-                      </div>
-                      <span className="text-sm text-white">
-                        Past Appointments
-                      </span>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className="border-green-500 text-green-500"
-                    >
-                      {isLoading
-                        ? "..."
-                        : appointments.filter(
-                            (app) => app.status === "completed"
-                          ).length}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-slate-800 rounded-md border border-slate-700">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-purple-600 rounded-full">
-                        <User className="h-4 w-4 text-white" />
-                      </div>
-                      <span className="text-sm text-white">
-                        Preferred Doctors
-                      </span>
-                    </div>
-                    <Badge
-                      variant="secondary"
-                      className="bg-purple-600 text-white"
-                    >
-                      {isLoading ? "..." : "3"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="border-t border-slate-700 p-4">
+              <CardFooter className="border-t border-gray-200 p-3 bg-gray-50">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full border-slate-600 text-slate-300 hover:text-white"
+                  className="w-full border-gray-300 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
                 >
-                  View Health Details
+                  <CalendarDays className="h-4 w-4 mr-2" />
+                  View Full Schedule
                 </Button>
               </CardFooter>
             </Card>

@@ -1,41 +1,35 @@
-import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/db"
-import { verifyToken } from "@/lib/auth"
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { verifyToken } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get("auth_token")?.value
-    if (!token) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
+    const token = req.cookies.get("auth_token")?.value;
+    if (!token) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
 
-    const userData = await verifyToken(token)
-    const userType = userData?.userType;
+    const userData = await verifyToken(token);
     const userId = userData?.userId;
 
-    let appointments = []
+    const appointments = await prisma.appointment.findMany({
+      where: { userId },
+      include: { doctor: true },
+    });
 
-    // if (userType === "resident") {
-    // const resident = await prisma.resident.findUnique({ where: { userId } })
-    // if (!resident) return NextResponse.json({ success: false, message: "Resident not found" }, { status: 404 })
+    const formatted = appointments.map((a) => ({
+      id: a.id,
+      doctorName: a.doctor.name,
+      specialization: a.doctor.specialty,
+      date: a.date.toISOString(),
+      time: a.timeSlot,
+      status: a.status,
+      reason: a.description,
+    }));
 
-    appointments = await prisma.appointment.findMany({
-      where: { userId: userId },
-      include: { doctor: true, prescriptions: true },
-    })
-    // } else if (userType === "doctor") {
-    //   const doctor = await prisma.doctor.findUnique({ where: { userId } })
-    //   if (!doctor) return NextResponse.json({ success: false, message: "Doctor not found" }, { status: 404 })
-
-    //   appointments = await prisma.appointment.findMany({
-    //     where: { userId: doctor.id },
-    //     include: { resident: true, prescriptions: true },
-    //   })
-    // } else {
-    //   return NextResponse.json({ success: false, message: "Not allowed" }, { status: 403 })
-    // }
-
-    return NextResponse.json({ success: true, appointments })
+    return NextResponse.json({ success: true, appointments: formatted });
   } catch (error) {
-    console.error("Error fetching appointments:", error)
-    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 })
+    console.error("Error fetching appointments:", error);
+    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
   }
 }
