@@ -1,20 +1,11 @@
-import { prisma } from '@/lib/db';
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { prisma } from '@/lib/db'
+import { NextResponse } from 'next/server'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const {
-    query: { id },
-    method,
-  } = req;
-
-  if (method !== 'GET') {
-    return res.status(405).json({ message: `Method ${method} Not Allowed` });
-  }
-
-  const doctorId = parseInt(id as string);
+export async function GET(req: Request, { params }: { params: { id: string } }) {
+  const doctorId = parseInt(params.id)
 
   if (isNaN(doctorId)) {
-    return res.status(400).json({ message: 'Invalid doctor ID' });
+    return NextResponse.json({ message: 'Invalid doctor ID' }, { status: 400 })
   }
 
   try {
@@ -26,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         specialty: true,
         _count: {
           select: {
-            Appointment: true, 
+            Appointment: true,
           },
         },
         Appointment: {
@@ -43,15 +34,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
         },
       },
-    });
+    })
 
     if (!doctorAnalytics) {
-      return res.status(404).json({ message: 'Doctor not found' });
+      return NextResponse.json({ message: 'Doctor not found' }, { status: 404 })
     }
 
-    return res.status(200).json(doctorAnalytics);
+    return NextResponse.json(doctorAnalytics, { status: 200 })
   } catch (error) {
-    console.error('[ERROR]', error);
-    return res.status(500).json({ message: 'Something went wrong' });
+    console.error('[ERROR]', error)
+    return NextResponse.json({ message: 'Something went wrong' }, { status: 500 })
   }
 }
