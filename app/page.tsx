@@ -75,23 +75,23 @@ const CounterAnimation = ({ target, title, symbol = "" }: any) => {
 
   return (
     <div ref={countRef} className="text-center p-6">
-      <div className="text-4xl font-bold text-blue-400 mb-2">
+      <div className="text-4xl font-bold text-blue-600 mb-2">
         {count}
         {symbol}
       </div>
-      <p className="text-gray-300">{title}</p>
+      <p className="text-gray-600">{title}</p>
     </div>
   );
 };
 
 export default function Home() {
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-gray-950">
-      {/* Star Background */}
-      <StarsBackground className="z-0" />
+    <div className="relative w-full min-h-screen overflow-hidden bg-white">
+      {/* Star Background (keep with reduced opacity) */}
+      <StarsBackground className="z-0 opacity-10" />
 
       {/* Navigation with Logo */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-sm border-b border-gray-800">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-200">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-4">
             {/* Logo Area */}
@@ -104,8 +104,10 @@ export default function Home() {
                 />
               </div>
               <div>
-                <h1 className="text-white font-bold text-xl">Health Center</h1>
-                <p className="text-blue-400 text-xs">
+                <h1 className="text-gray-800 font-bold text-xl">
+                  Health Center
+                </h1>
+                <p className="text-blue-600 text-xs">
                   Indian Institute of Information Technology, Allahabad
                 </p>
               </div>
@@ -118,7 +120,7 @@ export default function Home() {
                   <a
                     key={item}
                     href="#"
-                    className="text-gray-300 hover:text-white hover:underline underline-offset-4 decoration-blue-500 transition-all duration-200"
+                    className="text-gray-600 hover:text-blue-600 hover:underline underline-offset-4 decoration-blue-500 transition-all duration-200"
                   >
                     {item}
                   </a>
@@ -128,7 +130,7 @@ export default function Home() {
 
             {/* Mobile Menu Button */}
             <div className="md:hidden">
-              <Button variant="ghost" className="text-gray-300">
+              <Button variant="ghost" className="text-gray-600">
                 <svg
                   className="w-6 h-6"
                   fill="none"
@@ -158,7 +160,7 @@ export default function Home() {
         >
           {/* Large College Logo */}
           <div className="flex justify-center mb-8">
-            <div className="bg-gray-900/70 p-4 rounded-xl shadow-lg shadow-blue-500/10 backdrop-blur-sm">
+            <div className="bg-white p-4 rounded-xl shadow-lg shadow-blue-500/10 backdrop-blur-sm">
               <img
                 src="/logo.gif"
                 alt="College of Medicine Logo"
@@ -168,10 +170,10 @@ export default function Home() {
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
+            <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
               Health Center Doctor's Appointment
             </h1>
-            <p className="mx-auto max-w-[700px] text-gray-300 md:text-xl">
+            <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl">
               Book appointments with doctors, manage prescriptions, and check
               medicine availability.
             </p>
@@ -191,7 +193,7 @@ export default function Home() {
             <Link href="/register" className="w-full max-w-xs">
               <Button
                 variant="outline"
-                className="w-full border-blue-500 text-blue-400 hover:bg-blue-900/20 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/20"
+                className="w-full border-blue-500 text-blue-600 hover:bg-blue-100 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/20"
                 size="lg"
               >
                 <UserCog className="mr-2 h-5 w-5" />
@@ -212,16 +214,16 @@ export default function Home() {
       </div>
 
       {/* Affiliated College Section */}
-      <div className="bg-gray-900 py-16 relative z-10">
+      <div className="bg-gray-100 py-16 relative z-10">
         <div className="container mx-auto px-4">
           <ScrollReveal>
             <div className="flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="md:w-1/3 text-center md:text-left">
-                <h2 className="text-2xl font-bold text-white mb-4">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
                   Affiliated with{" "}
-                  <span className="text-blue-400">United Medicity</span>
+                  <span className="text-blue-600">United Medicity</span>
                 </h2>
-                <p className="text-gray-300">
+                <p className="text-gray-600">
                   Our Health Center is proudly affiliated with the prestigious
                   United Medicity, ensuring the highest standards of healthcare
                   education and practice.
@@ -233,16 +235,16 @@ export default function Home() {
 
               <div className="md:w-2/3 grid grid-cols-2 md:grid-cols-3 gap-6">
                 {facilities.map((facility, i) => (
-                  <div key={i} className="bg-gray-800 p-4 rounded-lg shadow-md">
+                  <div key={i} className="bg-white p-4 rounded-lg shadow-md">
                     <img
                       src={facility.image}
                       alt={facility.title}
                       className="w-full h-32 object-cover rounded"
                     />
-                    <h3 className="text-white font-medium mt-3">
+                    <h3 className="text-gray-800 font-medium mt-3">
                       {facility.title}
                     </h3>
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-gray-600 text-sm">
                       {facility.description}
                     </p>
                   </div>
@@ -254,26 +256,26 @@ export default function Home() {
       </div>
 
       {/* Feature Cards Section */}
-      <div className="bg-gray-950 py-20 relative z-10">
+      <div className="bg-white py-20 relative z-10">
         <div className="container mx-auto px-4">
           <ScrollReveal>
-            <h2 className="text-3xl font-bold text-center text-white mb-12">
+            <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
               Our Services
             </h2>
           </ScrollReveal>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 w-full max-w-6xl mx-auto">
             <ScrollReveal>
-              <Card className="bg-gray-900 border-gray-800 text-white overflow-hidden group hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <Card className="bg-white border-gray-200 text-gray-800 overflow-hidden group hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center text-lg font-medium">
-                    <CalendarDays className="mr-2 h-5 w-5 text-blue-400" />
+                    <CalendarDays className="mr-2 h-5 w-5 text-blue-600" />
                     Book Appointments
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-300">
+                  <p className="text-gray-600">
                     Schedule appointments with your preferred doctors at your
                     convenience.
                   </p>
@@ -282,16 +284,16 @@ export default function Home() {
             </ScrollReveal>
 
             <ScrollReveal>
-              <Card className="bg-gray-900 border-gray-800 text-white overflow-hidden group hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <Card className="bg-white border-gray-200 text-gray-800 overflow-hidden group hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center text-lg font-medium">
-                    <ClipboardList className="mr-2 h-5 w-5 text-blue-400" />
+                    <ClipboardList className="mr-2 h-5 w-5 text-blue-600" />
                     Manage Prescriptions
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-300">
+                  <p className="text-gray-600">
                     Access and manage your prescriptions from a single
                     dashboard.
                   </p>
@@ -300,16 +302,16 @@ export default function Home() {
             </ScrollReveal>
 
             <ScrollReveal>
-              <Card className="bg-gray-900 border-gray-800 text-white overflow-hidden group hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <Card className="bg-white border-gray-200 text-gray-800 overflow-hidden group hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center text-lg font-medium">
-                    <User className="mr-2 h-5 w-5 text-blue-400" />
+                    <User className="mr-2 h-5 w-5 text-blue-600" />
                     Patient Portal
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-300">
+                  <p className="text-gray-600">
                     Access your complete medical history and test results
                     online.
                   </p>
@@ -318,16 +320,16 @@ export default function Home() {
             </ScrollReveal>
 
             <ScrollReveal>
-              <Card className="bg-gray-900 border-gray-800 text-white overflow-hidden group hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <Card className="bg-white border-gray-200 text-gray-800 overflow-hidden group hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center text-lg font-medium">
-                    <UserCog className="mr-2 h-5 w-5 text-blue-400" />
+                    <UserCog className="mr-2 h-5 w-5 text-blue-600" />
                     Doctor Consultations
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-300">
+                  <p className="text-gray-600">
                     Connect with specialists through virtual consultations.
                   </p>
                 </CardContent>
@@ -338,7 +340,7 @@ export default function Home() {
       </div>
 
       {/* Health Center Image Section */}
-      <div className="bg-gray-900 py-24 relative z-10">
+      <div className="bg-gray-50 py-24 relative z-10">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <ScrollReveal className="lg:w-1/2">
@@ -352,10 +354,10 @@ export default function Home() {
             </ScrollReveal>
 
             <ScrollReveal className="lg:w-1/2 space-y-6">
-              <h2 className="text-3xl font-bold text-white">
+              <h2 className="text-3xl font-bold text-gray-800">
                 State-of-the-Art Medical Facility
               </h2>
-              <p className="text-gray-300">
+              <p className="text-gray-600">
                 Our Health Center is equipped with cutting-edge technology and
                 modern facilities to provide you with the best healthcare
                 experience. Our team of expert doctors and medical professionals
@@ -365,26 +367,26 @@ export default function Home() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-start">
-                  <div className="bg-blue-500/20 p-3 rounded-full mr-3">
-                    <Clock className="h-5 w-5 text-blue-400" />
+                  <div className="bg-blue-100 p-3 rounded-full mr-3">
+                    <Clock className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="text-white font-medium">24/7 Service</h3>
-                    <p className="text-gray-400 text-sm">
+                    <h3 className="text-gray-800 font-medium">24/7 Service</h3>
+                    <p className="text-gray-600 text-sm">
                       Available round the clock
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start">
-                  <div className="bg-blue-500/20 p-3 rounded-full mr-3">
-                    <MapPin className="h-5 w-5 text-blue-400" />
+                  <div className="bg-blue-100 p-3 rounded-full mr-3">
+                    <MapPin className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="text-white font-medium">
+                    <h3 className="text-gray-800 font-medium">
                       Multiple Locations
                     </h3>
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-gray-600 text-sm">
                       Convenient access nationwide
                     </p>
                   </div>
@@ -400,10 +402,10 @@ export default function Home() {
       </div>
 
       {/* Stats Section */}
-      <div className="bg-gray-950 py-20 relative z-10">
+      <div className="bg-white py-20 relative z-10">
         <div className="container mx-auto px-4">
           <ScrollReveal>
-            <h2 className="text-3xl font-bold text-center text-white mb-12">
+            <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">
               Our Impact
             </h2>
           </ScrollReveal>
@@ -426,13 +428,13 @@ export default function Home() {
       </div>
 
       {/* Doctor Team Preview */}
-      <div className="bg-gray-900 py-24 relative z-10">
+      <div className="bg-gray-50 py-24 relative z-10">
         <div className="container mx-auto px-4">
           <ScrollReveal>
-            <h2 className="text-3xl font-bold text-center text-white mb-4">
+            <h2 className="text-3xl font-bold text-center text-gray-800 mb-4">
               Meet Our Specialists
             </h2>
-            <p className="text-gray-300 text-center max-w-2xl mx-auto mb-12">
+            <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
               Our team of experienced doctors are ready to provide you with the
               best medical care
             </p>
@@ -441,7 +443,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
             {doctors.map((doctor, i) => (
               <ScrollReveal key={i}>
-                <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-blue-500/20 transition-all duration-300 group">
+                <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-blue-500/20 transition-all duration-300 group">
                   <div className="aspect-square overflow-hidden">
                     <img
                       src={doctor.image}
@@ -450,10 +452,10 @@ export default function Home() {
                     />
                   </div>
                   <div className="p-4 text-center">
-                    <h3 className="text-white font-medium text-lg">
+                    <h3 className="text-gray-800 font-medium text-lg">
                       {doctor.name}
                     </h3>
-                    <p className="text-blue-400">{doctor.specialization}</p>
+                    <p className="text-blue-600">{doctor.specialization}</p>
                   </div>
                 </div>
               </ScrollReveal>
@@ -469,10 +471,10 @@ export default function Home() {
       </div>
 
       {/* Testimonials Section */}
-      <div className="bg-gray-950 py-24 relative z-10">
+      <div className="bg-white py-24 relative z-10">
         <div className="container mx-auto px-4">
           <ScrollReveal>
-            <h2 className="text-3xl font-bold text-center text-white mb-16">
+            <h2 className="text-3xl font-bold text-center text-gray-800 mb-16">
               What Our Patients Say
             </h2>
           </ScrollReveal>
@@ -480,13 +482,13 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {[1, 2, 3].map((i) => (
               <ScrollReveal key={i}>
-                <Card className="bg-gray-900 border-gray-800 text-white">
+                <Card className="bg-white border-gray-200 text-gray-800">
                   <CardContent className="pt-6">
                     <div className="flex items-center mb-4">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <svg
                           key={star}
-                          className="w-5 h-5 text-yellow-400"
+                          className="w-5 h-5 text-yellow-500"
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
@@ -494,7 +496,7 @@ export default function Home() {
                         </svg>
                       ))}
                     </div>
-                    <p className="text-gray-300 italic mb-6">
+                    <p className="text-gray-600 italic mb-6">
                       "The appointment system is so easy to use and saved me so
                       much time. The doctors are professional and caring."
                     </p>
@@ -507,8 +509,10 @@ export default function Home() {
                         />
                       </div>
                       <div>
-                        <h4 className="text-white font-medium">Patient Name</h4>
-                        <p className="text-sm text-gray-400">Patient</p>
+                        <h4 className="text-gray-800 font-medium">
+                          Patient Name
+                        </h4>
+                        <p className="text-sm text-gray-600">Patient</p>
                       </div>
                     </div>
                   </CardContent>
@@ -520,20 +524,20 @@ export default function Home() {
       </div>
 
       {/* Contact & Appointment CTA */}
-      <div className="bg-gradient-to-r from-blue-900 to-purple-900 py-16 relative z-10">
+      <div className="bg-gradient-to-r from-blue-50 to-blue-100 py-16 relative z-10">
         <div className="container mx-auto px-4">
           <ScrollReveal>
             <div className="text-center max-w-3xl mx-auto">
-              <h2 className="text-3xl font-bold text-white mb-4">
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">
                 Ready to Book Your Appointment?
               </h2>
-              <p className="text-gray-200 mb-8">
+              <p className="text-gray-600 mb-8">
                 Take the first step towards better healthcare today. Register
                 and book your appointment in minutes.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Button
-                  className="bg-white text-blue-900 hover:bg-gray-100 transition-all duration-300 transform hover:scale-105 font-medium"
+                  className="bg-gray-800 text-white hover:bg-gray-700 transition-all duration-300 transform hover:scale-105 font-medium"
                   size="lg"
                 >
                   <Phone className="mr-2 h-5 w-5" />
@@ -553,9 +557,9 @@ export default function Home() {
       </div>
 
       {/* Footer with College Branding */}
-      <footer className="bg-gray-950 text-gray-400 py-12 relative z-10">
+      <footer className="bg-gray-100 text-gray-600 py-12 relative z-10">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8 pb-8 border-b border-gray-800">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8 pb-8 border-b border-gray-200">
             <div className="flex items-center mb-6 md:mb-0">
               <img
                 src="/api/placeholder/80/80"
@@ -563,8 +567,10 @@ export default function Home() {
                 className="h-16 w-auto mr-4"
               />
               <div>
-                <h3 className="text-white text-xl font-bold">Health Center</h3>
-                <p className="text-blue-400">College of Medicine</p>
+                <h3 className="text-gray-800 text-xl font-bold">
+                  Health Center
+                </h3>
+                <p className="text-blue-600">College of Medicine</p>
               </div>
             </div>
             <div className="flex flex-wrap justify-center gap-6">
@@ -573,7 +579,7 @@ export default function Home() {
                   <a
                     key={social}
                     href="#"
-                    className="text-gray-400 hover:text-blue-400 transition-colors"
+                    className="text-gray-600 hover:text-blue-600 transition-colors"
                   >
                     {social}
                   </a>
@@ -584,7 +590,9 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-white text-lg font-medium mb-4">About Us</h3>
+              <h3 className="text-gray-800 text-lg font-medium mb-4">
+                About Us
+              </h3>
               <p className="mb-4">
                 Providing quality healthcare services for over 20 years,
                 affiliated with the prestigious College of Medicine.
@@ -596,10 +604,10 @@ export default function Home() {
                     <a
                       key={social}
                       href="#"
-                      className="text-gray-400 hover:text-blue-400 transition-colors"
+                      className="text-gray-600 hover:text-blue-600 transition-colors"
                     >
                       <span className="sr-only">{social}</span>
-                      <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                         <svg
                           className="h-4 w-4"
                           fill="currentColor"
@@ -615,7 +623,7 @@ export default function Home() {
             </div>
 
             <div>
-              <h3 className="text-white text-lg font-medium mb-4">
+              <h3 className="text-gray-800 text-lg font-medium mb-4">
                 Quick Links
               </h3>
               <ul className="space-y-2">
@@ -624,7 +632,7 @@ export default function Home() {
                     <li key={link}>
                       <a
                         href="#"
-                        className="hover:text-blue-400 transition-colors"
+                        className="hover:text-blue-600 transition-colors"
                       >
                         {link}
                       </a>
@@ -635,7 +643,9 @@ export default function Home() {
             </div>
 
             <div>
-              <h3 className="text-white text-lg font-medium mb-4">Services</h3>
+              <h3 className="text-gray-800 text-lg font-medium mb-4">
+                Services
+              </h3>
               <ul className="space-y-2">
                 {[
                   "Primary Care",
@@ -647,7 +657,7 @@ export default function Home() {
                   <li key={service}>
                     <a
                       href="#"
-                      className="hover:text-blue-400 transition-colors"
+                      className="hover:text-blue-600 transition-colors"
                     >
                       {service}
                     </a>
@@ -657,21 +667,23 @@ export default function Home() {
             </div>
 
             <div>
-              <h3 className="text-white text-lg font-medium mb-4">Contact</h3>
+              <h3 className="text-gray-800 text-lg font-medium mb-4">
+                Contact
+              </h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
-                  <MapPin className="h-5 w-5 text-blue-400 mr-2 mt-0.5" />
+                  <MapPin className="h-5 w-5 text-blue-600 mr-2 mt-0.5" />
                   <span>
                     123 Health Center Drive, Healthcare City, HC 12345
                   </span>
                 </li>
                 <li className="flex items-center">
-                  <Phone className="h-5 w-5 text-blue-400 mr-2" />
+                  <Phone className="h-5 w-5 text-blue-600 mr-2" />
                   <span>(123) 456-7890</span>
                 </li>
                 <li className="flex items-center">
                   <svg
-                    className="h-5 w-5 text-blue-400 mr-2"
+                    className="h-5 w-5 text-blue-600 mr-2"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -689,7 +701,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center">
+          <div className="border-t border-gray-200 mt-12 pt-8 text-center">
             <p>
               &copy; {new Date().getFullYear()} Health Center - College of
               Medicine. All rights reserved.
