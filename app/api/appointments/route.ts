@@ -9,8 +9,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
+    console.log("token: ", token)
+
     const userData = await verifyToken(token);
-    const userId = userData?.userId;
+    const userId = userData?.Doctor?.id;
+
+    console.log("User ID from token:", userId);
 
     const appointments = await prisma.appointment.findMany({
       where: { userId },
@@ -27,6 +31,11 @@ export async function GET(req: NextRequest) {
       reason: a.description,
     }));
 
+    if (appointments.length === 0) {
+      console.log("Appointments length is 0")
+      return NextResponse.json({ success: true, appointments: [] });
+    }
+    console.log("Formatted" ,formatted);
     return NextResponse.json({ success: true, appointments: formatted });
   } catch (error) {
     console.error("Error fetching appointments:", error);

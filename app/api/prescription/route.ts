@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   try {
     const {
       appointmentId,
-      medicineIds,
+      medicineIds: selectedMedicineIds,
       quantities,
       description,
       dosage,
@@ -21,11 +21,26 @@ export async function POST(request: Request) {
       frequency?: string;
     } = await request.json();
 
+    // Combine duplicate medicine IDs and sum their quantities
+    const medicineMap = new Map<number, number>();
+
+    selectedMedicineIds.forEach((id, index) => {
+      const qty = quantities[index];
+      if (medicineMap.has(id)) {
+        medicineMap.set(id, medicineMap.get(id)! + qty);
+      } else {
+        medicineMap.set(id, qty);
+      }
+    });
+
+    const medicineIds = Array.from(medicineMap.keys());
+    const combinedQuantities = Array.from(medicineMap.values());
+
     if (
       !appointmentId ||
       !medicineIds ||
-      !quantities ||
-      medicineIds.length !== quantities.length
+      !combinedQuantities ||
+      medicineIds.length !== combinedQuantities.length
     ) {
       return NextResponse.json(
         { message: 'Missing required fields or mismatched array lengths' },
@@ -46,7 +61,7 @@ export async function POST(request: Request) {
         );
       }
 
-      if (medicine.quantity < quantities[i]) {
+      if (medicine.quantity < combinedQuantities[i]) {
         return NextResponse.json(
           { message: `Insufficient stock for medicine ${medicineIds[i]}` },
           { status: 400 }
@@ -65,7 +80,7 @@ export async function POST(request: Request) {
         medicines: {
           create: medicineIds.map((medicineId, index) => ({
             medicineId,
-            quantity: quantities[index],
+            quantity: combinedQuantities[index],
           })),
         },
       },
@@ -76,7 +91,7 @@ export async function POST(request: Request) {
       await prisma.medicine.update({
         where: { id: medicineIds[i] },
         data: {
-          quantity: { decrement: quantities[i] },
+          quantity: { decrement: combinedQuantities[i] },
         },
       });
     }

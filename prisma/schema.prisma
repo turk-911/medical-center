@@ -17,22 +17,13 @@ model User {
   passwordHash String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
-  Resident     Resident?
-  Doctor       Doctor?
-  Faculty      Faculty?
-  Staff        Staff?
-  Student      Student?
   Admin        Admin?
   Appointment  Appointment[]
-}
-
-enum Role {
-  resident
-  doctor
-  faculty
-  staff
-  student
-  admin
+  Doctor       Doctor?
+  Faculty      Faculty?
+  Resident     Resident?
+  Staff        Staff?
+  Student      Student?
 }
 
 model Resident {
@@ -70,15 +61,15 @@ model Doctor {
   id            Int            @id @default(autoincrement())
   name          String
   specialty     String
-  rating        Float          @default(4.8)
+  userId        Int            @unique
   availability  String         @default("Today")
   image         String         @default("/api/placeholder/64/64")
-  userId        Int            @unique
+  rating        Float          @default(4.8)
+  Appointment   Appointment[]
+  Availability  Availability[]
   user          User           @relation(fields: [userId], references: [id])
   leaves        OnLeave[]      @relation("DoctorLeaves")
   substitutions OnLeave[]      @relation("DoctorSubstitute")
-  Availability  Availability[]
-  Appointment   Appointment[]
 }
 
 model Availability {
@@ -88,6 +79,8 @@ model Availability {
   startTime String
   endTime   String
   doctor    Doctor @relation(fields: [doctorId], references: [id])
+
+  @@index([doctorId], map: "Availability_doctorId_fkey")
 }
 
 model OnLeave {
@@ -98,56 +91,69 @@ model OnLeave {
   substituteId Int
   doctor       Doctor   @relation("DoctorLeaves", fields: [doctorId], references: [id])
   substitute   Doctor   @relation("DoctorSubstitute", fields: [substituteId], references: [id])
+
+  @@index([doctorId], map: "OnLeave_doctorId_fkey")
+  @@index([substituteId], map: "OnLeave_substituteId_fkey")
 }
 
 model Appointment {
-  id            Int            @id @default(autoincrement())
-  date          DateTime
-  timeSlot      String
-  status        String         @default("upcoming")
-  description   String?
-  doctorId      Int
-  userId        Int
-  doctor        Doctor         @relation(fields: [doctorId], references: [id])
-  user          User           @relation(fields: [userId], references: [id])
-  prescriptions Prescription[]
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  timeSlot    String
+  status      String   @default("upcoming")
+  description String?
+  doctorId    Int
+  userId      Int
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([doctorId], map: "Appointment_doctorId_fkey")
+  @@index([userId], map: "Appointment_userId_fkey")
 }
 
 model Medicine {
-  id            Int            @id @default(autoincrement())
-  name          String         @unique
+  id            Int                    @id @default(autoincrement())
+  name          String                 @unique
   quantity      Int
   unit          String
-  addedOn       DateTime       @default(now())
-  updatedOn     DateTime       @updatedAt
+  addedOn       DateTime               @default(now())
+  updatedOn     DateTime               @updatedAt
   prescriptions PrescriptionMedicine[]
 }
 
-model Prescription {
-  id            Int                    @id @default(autoincrement())
-  appointmentId Int
-  description   String? 
-  dosage        String?     
-  duration      String?    
-  frequency     String? 
-  appointment   Appointment            @relation(fields: [appointmentId], references: [id])
-  medicines     PrescriptionMedicine[]
-}
-
-
 model PrescriptionMedicine {
-  id            Int       @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   prescriptionId Int
-  medicineId    Int
-  quantity      Int
-  prescription  Prescription @relation(fields: [prescriptionId], references: [id])
-  medicine      Medicine     @relation(fields: [medicineId], references: [id])
+  medicineId     Int
+  quantity       Int
+  medicine       Medicine @relation(fields: [medicineId], references: [id])
 
   @@unique([prescriptionId, medicineId])
+  @@index([medicineId], map: "PrescriptionMedicine_medicineId_fkey")
 }
 
 model Admin {
   id     Int  @id @default(autoincrement())
   userId Int  @unique
   user   User @relation(fields: [userId], references: [id])
+}
+
+model prescription {
+  id            Int     @id @default(autoincrement())
+  appointmentId Int
+  description   String?
+  dosage        String?
+  duration      String?
+  frequency     String?
+
+  @@index([appointmentId], map: "Prescription_appointmentId_fkey")
+}
+
+enum Role {
+  resident
+  doctor
+  faculty
+  staff
+  student
+  admin
 }

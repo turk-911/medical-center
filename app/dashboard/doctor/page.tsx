@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import PrescribeForm from "@/components/prescription-form";
 
 export type Medicine = {
   expiryDate: React.ReactNode;
@@ -90,6 +91,14 @@ export default function DoctorDashboard() {
   const [isSubmittingLeave, setIsSubmittingLeave] = useState(false);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const handlePrescribeClick = (appointment: any) => {
+    setSelectedAppointment(appointment);
+    setShowForm(true);
+  };
+
   const [clientDateInfo, setClientDateInfo] = useState<{
     label: string;
     status: string;
@@ -118,7 +127,7 @@ export default function DoctorDashboard() {
         console.error("Error fetching user data:", error);
       }
     };
-    fetchAppointments();
+    // fetchAppointments();
     fetchMedicines();
     fetchUserData();
   }, []);
@@ -135,12 +144,19 @@ export default function DoctorDashboard() {
 
   console.log(user);
 
+  useEffect(() => {
+    if (user?.role === "doctor" && user?.Doctor?.id) {
+      fetchAppointments();
+    }
+  }, [user]);
+
   const fetchAppointments = async () => {
     setIsAppointmentsLoading(true);
     setAppointmentsError(null);
 
     try {
-      const response = await fetch(`/api/appointments/${user.id}`);
+      const response = await fetch(`/api/appointments/${user.Doctor.id}`);
+      console.log("Fetching appointments for doctor ID:", user.Doctor.id);
 
       if (!response.ok) {
         throw new Error(`Error fetching appointments: ${response.statusText}`);
@@ -274,6 +290,8 @@ export default function DoctorDashboard() {
         ? appointments
         : appointments.filter((app) => app.status === status);
 
+    console.log(filteredAppointments);
+
     if (filteredAppointments.length === 0) {
       return (
         <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-md border border-dashed border-gray-300 flex flex-col items-center">
@@ -287,72 +305,82 @@ export default function DoctorDashboard() {
     }
 
     return filteredAppointments.map((appointment) => (
-      <Card
-        key={appointment.id}
-        className="border-gray-200 shadow-sm mb-4 hover:shadow-md transition-all"
-      >
-        <CardContent className="p-4">
-          <div className="flex flex-col space-y-3">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-100 rounded-full">
-                  <User className="h-4 w-4 text-blue-600" />
+      <>
+        <Card
+          key={appointment.id}
+          className="border-gray-200 shadow-sm mb-4 hover:shadow-md transition-all"
+        >
+          <CardContent className="p-4">
+            <div className="flex flex-col space-y-3">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-100 rounded-full">
+                    <User className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <h3 className="font-medium text-gray-800">
+                    {appointment.user.name}
+                  </h3>
                 </div>
-                <h3 className="font-medium text-gray-800">
-                  {appointment.patientName}
-                </h3>
-              </div>
-              <Badge
-                variant={
-                  appointment.status === "upcoming" ? "default" : "outline"
-                }
-                className={
-                  appointment.status === "upcoming"
-                    ? "bg-blue-500 hover:bg-blue-600"
-                    : ""
-                }
-              >
-                {appointment.time}
-              </Badge>
-            </div>
-
-            <div className="text-sm text-gray-500">
-              <span className="inline-flex items-center">
-                <CalendarIcon className="mr-1 h-3 w-3" />
-                {new Date(appointment.date).toLocaleDateString()}
-              </span>
-              <span className="mx-2">•</span>
-              <span className="inline-flex items-center">
-                <Clock className="mr-1 h-3 w-3" />
-                {appointment.status}
-              </span>
-            </div>
-
-            <div className="text-sm text-gray-700">
-              <span className="font-medium">Reason: </span>
-              {appointment.description}
-            </div>
-
-            <div className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-gray-300 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
-              >
-                View Details
-              </Button>
-              {appointment.status === "upcoming" && (
-                <Button
-                  size="sm"
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                <Badge
+                  variant={
+                    appointment.status === "upcoming" ? "default" : "outline"
+                  }
+                  className={
+                    appointment.status === "upcoming"
+                      ? "bg-blue-500 hover:bg-blue-600"
+                      : ""
+                  }
                 >
-                  Start Consultation
+                  {appointment.time}
+                </Badge>
+              </div>
+
+              <div className="text-sm text-gray-500">
+                <span className="inline-flex items-center">
+                  <CalendarIcon className="mr-1 h-3 w-3" />
+                  {new Date(appointment.date).toLocaleDateString()}
+                </span>
+                <span className="mx-2">•</span>
+                <span className="inline-flex items-center">
+                  <Clock className="mr-1 h-3 w-3" />
+                  {appointment.status}
+                </span>
+              </div>
+
+              <div className="text-sm text-gray-700">
+                <span className="font-medium">Reason: </span>
+                {appointment.description}
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+                >
+                  View Details
                 </Button>
-              )}
+                {appointment.status === "upcoming" && (
+                  <Button
+                    size="sm"
+                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                    onClick={() => handlePrescribeClick(appointment)}
+                  >
+                    Prescribe
+                  </Button>
+                )}
+                {showForm && selectedAppointment && (
+                  <PrescribeForm
+                    appointmentId={appointment.id}
+                    onClose={() => setShowForm(false)}
+                    medicineList={medicines}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </>
     ));
   };
 

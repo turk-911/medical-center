@@ -27,6 +27,7 @@ import {
 import AppointmentList from "@/components/appointment-list";
 import BookAppointment from "@/components/book-appointment";
 import { format, addMonths, subMonths } from "date-fns";
+import PatientPrescription from "@/components/patient-prescription";
 
 type Appointment = {
   id: number;
@@ -485,18 +486,7 @@ export default function Dashboard() {
                 </TabsContent>
 
                 <TabsContent value="records">
-                  <div className="bg-gray-100 p-6 rounded-lg text-center">
-                    <FileText className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-                    <h3 className="text-gray-800 font-medium mb-2">
-                      Medical Records
-                    </h3>
-                    <p className="text-gray-500 mb-4">
-                      Access and manage your medical history and test results
-                    </p>
-                    <Button className="bg-blue-500 hover:bg-blue-600 text-white">
-                      View Records
-                    </Button>
-                  </div>
+                  <PatientPrescription  />
                 </TabsContent>
               </Tabs>
             </CardContent>
