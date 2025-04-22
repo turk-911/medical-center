@@ -92,7 +92,7 @@ export default function Dashboard() {
         const response = await fetch("/api/user/profile");
         if (response.ok) {
           const data = await response.json();
-          console.log("Patient", data.user);  
+          console.log("Patient", data.user);
           setUser(data.user);
         }
       } catch (error) {
@@ -168,6 +168,8 @@ export default function Dashboard() {
   const selectedDayAppointments = appointments.filter(
     (a) => a.date === format(selectedDate as Date, "yyyy-MM-dd")
   );
+
+  // console.log("User id", user.id)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 bg-cover bg-fixed">
@@ -407,7 +409,7 @@ export default function Dashboard() {
                               <div className="flex items-center space-x-4">
                                 <Avatar className="h-16 w-16 border-2 border-gray-200">
                                   <AvatarImage
-                                    src={doctor.image}
+                                    src={doctor.image || "/placeholder.svg"}
                                     alt={doctor.name}
                                   />
                                   <AvatarFallback className="bg-blue-500 text-white">
@@ -486,7 +488,7 @@ export default function Dashboard() {
                 </TabsContent>
 
                 <TabsContent value="records">
-                  <PatientPrescription  />
+                  <PatientPrescription />
                 </TabsContent>
               </Tabs>
             </CardContent>
