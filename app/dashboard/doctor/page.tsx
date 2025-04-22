@@ -94,6 +94,7 @@ export default function DoctorDashboard() {
 
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [doctors, setDoctors] = useState()
 
   const handlePrescribeClick = (appointment: any) => {
     setSelectedAppointment(appointment);
@@ -196,17 +197,26 @@ export default function DoctorDashboard() {
     }
   };
 
+  // Replace the existing handleLeaveSubmit function with this updated version
   const handleLeaveSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmittingLeave(true);
 
     try {
-      const response = await fetch("/api/doctor/leave", {
+      // Convert the substituteDoctor string to a number for the API
+      const substituteId = Number.parseInt(leaveData.substituteDoctor);
+
+      const response = await fetch("/api/leave/request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(leaveData),
+        body: JSON.stringify({
+          doctorId: user?.Doctor?.id,
+          substituteId: substituteId,
+          fromDate: leaveData.startDate,
+          toDate: leaveData.endDate,
+        }),
       });
 
       if (!response.ok) {
@@ -251,13 +261,37 @@ export default function DoctorDashboard() {
     }
   };
 
-  // Mock data for doctors
-  const doctors = [
-    { id: 1, name: "Dr. James Wilson" },
-    { id: 2, name: "Dr. Emily Rodriguez" },
-    { id: 3, name: "Dr. Michael Chen" },
-    { id: 4, name: "Dr. Lisa Patel" },
-  ];
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      const res = await fetch("/api/doctors");
+      const data = await res.json();
+      setDoctors(data.doctors);
+    };
+
+    fetchDoctors();
+  }, []);
+
+  const handleLeaveSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const res = await fetch('/api/leave/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        doctorId,
+        fromDate,
+        toDate,
+        substituteId: parseInt(substituteId),
+      }),
+    });
+
+    const result = await res.json();
+    if (res.ok) {
+      setMessage('Leave request submitted successfully.');
+    } else {
+      setMessage(result.message || 'Failed to request leave.');
+    }
+  };
 
   const renderAppointmentList = (status: any) => {
     if (isAppointmentsLoading) {
