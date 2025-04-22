@@ -14,13 +14,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,6 +37,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import PrescribeForm from "@/components/prescription-form";
+import { toast } from "sonner";
+
 
 export type Medicine = {
   expiryDate: React.ReactNode;
@@ -81,8 +76,7 @@ export default function DoctorDashboard() {
   const [leaveData, setLeaveData] = useState({
     startDate: "",
     endDate: "",
-    reason: "",
-    substituteDoctor: "",
+    substituteEmail: "",
   });
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [isMedicinesLoading, setIsMedicinesLoading] = useState(true);
@@ -94,7 +88,6 @@ export default function DoctorDashboard() {
 
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [doctors, setDoctors] = useState()
 
   const handlePrescribeClick = (appointment: any) => {
     setSelectedAppointment(appointment);
@@ -167,7 +160,7 @@ export default function DoctorDashboard() {
       const data = await response.json();
       console.log(data);
       setAppointments(data.appointments);
-    } catch (error) {
+    } catch (error : any) {
       console.error("Error fetching appointments:", error);
       setAppointmentsError(error.message);
     } finally {
@@ -189,7 +182,7 @@ export default function DoctorDashboard() {
       const data = await response.json();
       setMedicines(data);
       setFilteredMedicines(data);
-    } catch (error) {
+    } catch (error : any) {
       console.error("Error fetching medicines:", error);
       setMedicinesError(error.message);
     } finally {
@@ -203,19 +196,15 @@ export default function DoctorDashboard() {
     setIsSubmittingLeave(true);
 
     try {
-      // Convert the substituteDoctor string to a number for the API
-      const substituteId = Number.parseInt(leaveData.substituteDoctor);
-
       const response = await fetch("/api/leave/request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          doctorId: user?.Doctor?.id,
-          substituteId: substituteId,
-          fromDate: leaveData.startDate,
-          toDate: leaveData.endDate,
+          startDate: leaveData.startDate,
+          endDate: leaveData.endDate,
+          substituteDoctorEmail: leaveData.substituteEmail,
         }),
       });
 
@@ -225,23 +214,22 @@ export default function DoctorDashboard() {
         );
       }
 
-      alert("Leave request submitted successfully");
+      toast.success("Leave request submitted successfully");
       setShowLeaveForm(false);
       setLeaveData({
         startDate: "",
         endDate: "",
-        reason: "",
-        substituteDoctor: "",
+        substituteEmail: "",
       });
-    } catch (error) {
+    } catch (error : any) {
       console.error("Error submitting leave request:", error);
-      alert(`Failed to submit leave request: ${error.message}`);
+      toast.error(`Failed to submit leave request: ${error.message}`);
     } finally {
       setIsSubmittingLeave(false);
     }
   };
 
-  const handleMedicineSearch = (e) => {
+  const handleMedicineSearch = (e : any) => {
     setMedicineSearch(e.target.value);
   };
 
@@ -261,37 +249,13 @@ export default function DoctorDashboard() {
     }
   };
 
-  useEffect(() => {
-    const fetchDoctors = async () => {
-      const res = await fetch("/api/doctors");
-      const data = await res.json();
-      setDoctors(data.doctors);
-    };
-
-    fetchDoctors();
-  }, []);
-
-  const handleLeaveSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const res = await fetch('/api/leave/request', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        doctorId,
-        fromDate,
-        toDate,
-        substituteId: parseInt(substituteId),
-      }),
-    });
-
-    const result = await res.json();
-    if (res.ok) {
-      setMessage('Leave request submitted successfully.');
-    } else {
-      setMessage(result.message || 'Failed to request leave.');
-    }
-  };
+  // Mock data for doctors
+  const doctors = [
+    { id: 1, name: "Dr. James Wilson" },
+    { id: 2, name: "Dr. Emily Rodriguez" },
+    { id: 3, name: "Dr. Michael Chen" },
+    { id: 4, name: "Dr. Lisa Patel" },
+  ];
 
   const renderAppointmentList = (status: any) => {
     if (isAppointmentsLoading) {
@@ -909,50 +873,26 @@ export default function DoctorDashboard() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="reason" className="text-gray-700">
-                        Reason
+                      <Label
+                        htmlFor="substituteEmail"
+                        className="text-gray-700"
+                      >
+                        Substitute Doctor Email
                       </Label>
                       <Input
-                        id="reason"
-                        value={leaveData.reason}
+                        id="substituteEmail"
+                        type="email"
+                        placeholder="Enter substitute doctor's email"
+                        value={leaveData.substituteEmail}
                         onChange={(e) =>
-                          setLeaveData({ ...leaveData, reason: e.target.value })
+                          setLeaveData({
+                            ...leaveData,
+                            substituteEmail: e.target.value,
+                          })
                         }
                         className="border-gray-300"
                         required
                       />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="substituteDoctor"
-                        className="text-gray-700"
-                      >
-                        Substitute Doctor
-                      </Label>
-                      <Select
-                        value={leaveData.substituteDoctor}
-                        onValueChange={(value) =>
-                          setLeaveData({
-                            ...leaveData,
-                            substituteDoctor: value,
-                          })
-                        }
-                      >
-                        <SelectTrigger className="border-gray-300">
-                          <SelectValue placeholder="Select a doctor" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {doctors.map((doctor) => (
-                            <SelectItem
-                              key={doctor.id}
-                              value={doctor.id.toString()}
-                            >
-                              {doctor.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
                     </div>
 
                     <div className="flex justify-end space-x-2">

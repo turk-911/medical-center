@@ -6,8 +6,8 @@ export async function GET(
     { params }: { params: { id: string } }
 ) {
     const doctorId = parseInt(params.id);
-    console.log(doctorId);
-    console.log(params.id)
+    console.log("Doctor ID:", doctorId);
+    console.log("Params ID:", params.id);
 
     if (isNaN(doctorId)) {
         return NextResponse.json({ message: "Invalid doctor ID" }, { status: 400 });
@@ -15,9 +15,11 @@ export async function GET(
 
     try {
         const appointments = await prisma.appointment.findMany({
-            where: { doctorId },
+            where: {
+                doctorId,  // Filter appointments by doctorId
+            },
             include: {
-                user: {
+                user: {  // Include user info (patient information)
                     select: {
                         id: true,
                         name: true,
@@ -25,17 +27,19 @@ export async function GET(
                         role: true,
                     },
                 },
-                prescriptions: {
+                prescription: {  // Include prescription details if available
                     include: {
-                        medicines: {
+                        PrescriptionMedicine: {  // Include associated medicines for the prescription
                             include: {
-                                medicine: true,
+                                medicine: true,  // Include medicine details (name, quantity, etc.)
                             },
                         },
                     },
                 },
             },
-            orderBy: { date: "asc" },
+            orderBy: {
+                date: "asc",  // Order appointments by date in ascending order
+            },
         });
 
         return NextResponse.json({ appointments }, { status: 200 });

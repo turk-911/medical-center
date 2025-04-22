@@ -90,7 +90,7 @@ model OnLeave {
   toDate       DateTime
   doctorId     Int
   substituteId Int
-  status       String   @default("pending") // NEW FIELD
+  status       String   @default("pending") 
   doctor       Doctor   @relation("DoctorLeaves", fields: [doctorId], references: [id])
   substitute   Doctor   @relation("DoctorSubstitute", fields: [substituteId], references: [id])
 
