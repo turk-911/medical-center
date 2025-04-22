@@ -135,6 +135,27 @@ interface Prescription {
   medicines: PrescriptionMedicine[];
 }
 
+interface UserBasic {
+  email: string;
+}
+
+interface Doctor {
+  id: number;
+  name: string;
+  user: UserBasic;
+}
+
+interface Leave {
+  id: number;
+  fromDate: string; // Dates from backend are ISO strings
+  toDate: string;
+  doctorId: number;
+  substituteId: number;
+  doctor: Doctor;
+  substitute: Doctor;
+  status: "pending" | "approved" | "rejected";
+}
+
 // Dashboard analytics interface
 interface DashboardAnalytics {
   totalResidents: number;
@@ -188,6 +209,8 @@ export default function AdminDashboard() {
     { dayOfWeek: string; startTime: string; endTime: string }[]
   >([{ dayOfWeek: "", startTime: "", endTime: "" }]);
 
+
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -238,7 +261,7 @@ export default function AdminDashboard() {
 
         const uniqueMedicines = new Map<number, Medicine>();
         prescriptionsData.forEach((prescription) => {
-          prescription.medicines.forEach((prescMed) => {
+          prescription.PrescriptionMedicine.forEach((prescMed) => {
             if (!uniqueMedicines.has(prescMed.medicine.id)) {
               uniqueMedicines.set(prescMed.medicine.id, prescMed.medicine);
             }
@@ -260,7 +283,7 @@ export default function AdminDashboard() {
 
     fetchData();
   }, [selectedDoctorId]);
-
+  
   const generateDashboardAnalytics = (
     doctors: Doctor[],
     appointments: Appointment[],
@@ -366,7 +389,7 @@ export default function AdminDashboard() {
 
       const uniqueMedicines = new Map<number, Medicine>();
       prescriptionsData.forEach((prescription) => {
-        prescription.medicines.forEach((prescMed) => {
+        prescription.PrescriptionMedicine.forEach((prescMed) => {
           if (!uniqueMedicines.has(prescMed.medicine.id)) {
             uniqueMedicines.set(prescMed.medicine.id, prescMed.medicine);
           }
@@ -456,6 +479,24 @@ export default function AdminDashboard() {
         return "outline";
     }
   };
+
+  const [leaves, setLeaves] = useState<Leave[]>([]);
+
+  useEffect(() => {
+    const fetchLeaves = async () => {
+      try {
+        const response = await fetch("/api/leave");
+        const data: Leave[] = await response.json();
+        setLeaves(data);
+      } catch (error) {
+        console.error("Failed to fetch leaves", error);
+      }
+    };
+
+    console.log(leaves);
+
+    fetchLeaves();
+  }, []);
 
   const getDoctorStatus = (
     doctor: Doctor
@@ -552,6 +593,33 @@ export default function AdminDashboard() {
     const formattedTime = `${formattedHours}:${formattedMinutes} ${ampm}`;
 
     return { date: formattedDate, time: formattedTime };
+  };
+
+  const handleLeaveAction = async (
+    leaveId: number,
+    action: "approved" | "rejected"
+  ) => {
+    try {
+      const response = await fetch(`/api/leave/${leaveId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: action }),
+      });
+
+      if (response.ok) {
+        setLeaves(
+          leaves.map((leave) =>
+            leave.id === leaveId ? { ...leave, status: action } : leave
+          )
+        );
+      } else {
+        console.error("Failed to update leave status");
+      }
+    } catch (error) {
+      console.error("Error updating leave status:", error);
+    }
   };
 
   const COLORS = ["#4f46e5", "#06b6d4", "#f59e0b", "#ef4444"];
@@ -652,6 +720,13 @@ export default function AdminDashboard() {
               >
                 <Pill className="h-4 w-4" />
                 <span className="hidden md:inline">Medicines</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="leaves"
+                className="flex items-center gap-2 data-[state=active]:bg-purple-50 data-[state=active]:text-purple-700"
+              >
+                <CalendarDays className="h-4 w-4" />
+                <span className="hidden md:inline">Leaves</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -947,6 +1022,7 @@ export default function AdminDashboard() {
                                         "/placeholder.svg?height=40&width=40" ||
                                         "/placeholder.svg" ||
                                         "/placeholder.svg" ||
+                                        "/placeholder.svg" ||
                                         "/placeholder.svg"
                                       }
                                       alt={doctor.name}
@@ -1143,6 +1219,7 @@ export default function AdminDashboard() {
                                         src={
                                           appointment.user.image ||
                                           "/placeholder.svg?height=40&width=40" ||
+                                          "/placeholder.svg" ||
                                           "/placeholder.svg" ||
                                           "/placeholder.svg" ||
                                           "/placeholder.svg"
@@ -1556,6 +1633,227 @@ export default function AdminDashboard() {
                 <div className="text-sm">
                   Showing {filteredMedicines.length} of {medicines.length}{" "}
                   medicines
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    className="text-slate-700"
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-slate-700 hover:bg-slate-100"
+                  >
+                    Next
+                  </Button>
+                </div>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+          <TabsContent value="leaves" className="space-y-6">
+            <Card className="bg-white border-none shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-slate-800">
+                  Manage Leave Requests
+                </CardTitle>
+                <CardDescription>
+                  Approve or reject leave requests from doctors
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-grow">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+                      <Input
+                        type="text"
+                        placeholder="Search leave requests"
+                        className="pl-8 border-slate-200 focus:border-purple-500 focus:ring-purple-500"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger className="w-full sm:w-[200px] border-slate-200 focus:border-purple-500 focus:ring-purple-500">
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="rounded-md border border-slate-200 overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="bg-slate-50">
+                            <th className="text-left p-3 font-medium text-slate-700">
+                              Doctor
+                            </th>
+                            <th className="text-left p-3 font-medium text-slate-700">
+                              Substitute
+                            </th>
+                            <th className="text-left p-3 font-medium text-slate-700">
+                              Duration
+                            </th>
+                            <th className="text-left p-3 font-medium text-slate-700">
+                              Reason
+                            </th>
+                            <th className="text-left p-3 font-medium text-slate-700">
+                              Status
+                            </th>
+                            <th className="text-left p-3 font-medium text-slate-700">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200">
+                          {leaves.map((leave) => {
+                            const startDate = new Date(
+                              leave.startDate
+                            ).toLocaleDateString();
+                            const endDate = new Date(
+                              leave.endDate
+                            ).toLocaleDateString();
+                            return (
+                              <tr
+                                key={leave.id}
+                                className="hover:bg-slate-50 transition-colors duration-150"
+                              >
+                                <td className="p-3">
+                                  <div className="flex items-center gap-3">
+                                    <Avatar>
+                                      <AvatarImage
+                                        src={
+                                          leave.doctor.user?.image ||
+                                          "/placeholder.svg?height=40&width=40"
+                                        }
+                                        alt={leave.doctor.name}
+                                      />
+                                      <AvatarFallback className="bg-purple-100 text-purple-700">
+                                        {leave.doctor.name.substring(0, 2)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="font-medium text-slate-800">
+                                        {leave.doctor.name}
+                                      </p>
+                                      <p className="text-sm text-slate-500">
+                                        {leave.doctor.specialty}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="p-3 text-slate-700">
+                                  <div className="flex items-center gap-3">
+                                    <Avatar>
+                                      <AvatarImage
+                                        src={
+                                          leave.substitute.user?.image ||
+                                          "/placeholder.svg?height=40&width=40"
+                                        }
+                                        alt={leave.substitute.name}
+                                      />
+                                      <AvatarFallback className="bg-purple-100 text-purple-700">
+                                        {leave.substitute.name.substring(0, 2)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="font-medium text-slate-800">
+                                        {leave.substitute.name}
+                                      </p>
+                                      <p className="text-sm text-slate-500">
+                                        {leave.substitute.specialty}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="p-3">
+                                  <div>
+                                    <p className="font-medium text-slate-800">
+                                      {startDate}
+                                    </p>
+                                    <p className="text-sm text-slate-500">
+                                      to {endDate}
+                                    </p>
+                                  </div>
+                                </td>
+                                <td className="p-3 text-slate-700">
+                                  {leave.reason}
+                                </td>
+                                <td className="p-3">
+                                  <Badge
+                                    variant={
+                                      leave.status === "approved"
+                                        ? "success"
+                                        : leave.status === "rejected"
+                                        ? "destructive"
+                                        : "outline"
+                                    }
+                                  >
+                                    {leave.status.charAt(0).toUpperCase() +
+                                      leave.status.slice(1)}
+                                  </Badge>
+                                </td>
+                                <td className="p-3">
+                                  {leave.status === "pending" ? (
+                                    <div className="flex space-x-2">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() =>
+                                          handleLeaveAction(
+                                            leave.id,
+                                            "approved"
+                                          )
+                                        }
+                                        className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
+                                      >
+                                        Approve
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() =>
+                                          handleLeaveAction(
+                                            leave.id,
+                                            "rejected"
+                                          )
+                                        }
+                                        className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                                      >
+                                        Reject
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <span className="text-slate-500 text-sm">
+                                      {leave.status === "approved"
+                                        ? "Approved"
+                                        : "Rejected"}
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between border-t p-4 text-slate-600">
+                <div className="text-sm">
+                  Showing {filteredLeaves.length} of {leaves.length} leave
+                  requests
                 </div>
                 <div className="flex gap-2">
                   <Button
