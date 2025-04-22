@@ -178,11 +178,31 @@ export default function AdminDashboard() {
 
   const [status, setStatus] = useState("");
 
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const handleLogout = async () => {
+    console.log("Logout button clicked")
+    try {
+      const response = await fetch("/api/logout", {
+        method: "GET",
+      });
+      if (response.ok) {
+        window.location.href = "/";
+      } else {
+        console.error("Failed to log out");
+      }
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Set default active tab to "doctors" instead of "overview"
         setActiveTab("doctors");
 
         const doctorsRes = await fetch("/api/admin/doctors");
@@ -526,11 +546,7 @@ export default function AdminDashboard() {
               variant="destructive"
               size="sm"
               className="flex items-center gap-1"
-              onClick={() => {
-                // Add logout functionality here
-                console.log("Logging out...");
-                // Redirect to login page or call logout API
-              }}
+              onClick={handleLogout}
             >
               <LogOut className="h-4 w-4 mr-1" />
               Logout

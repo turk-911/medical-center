@@ -23,6 +23,7 @@ import {
   FileText,
   Settings,
   PlusCircle,
+  LogOut,
 } from "lucide-react";
 import AppointmentList from "@/components/appointment-list";
 import BookAppointment from "@/components/book-appointment";
@@ -118,6 +119,22 @@ export default function Dashboard() {
     fetchUserData();
     fetchAppointments();
   }, []);
+  
+  const handleLogout = async () => {
+    console.log("Logout button clicked");
+    try {
+      const response = await fetch("/api/logout", {
+        method: "GET",
+      });
+      if (response.ok) {
+        window.location.href = "/";
+      } else {
+        console.error("Failed to log out");
+      }
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   const fetchAppointments = async () => {
     try {
@@ -202,6 +219,15 @@ export default function Dashboard() {
             </Button>
             <Button variant="ghost" size="icon">
               <Settings className="h-5 w-5 text-gray-600" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-1" />
+              Logout
             </Button>
           </div>
         </div>

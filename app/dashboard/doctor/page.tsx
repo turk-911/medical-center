@@ -39,6 +39,7 @@ import {
   PlusCircle,
   FileText,
   Activity,
+  LogOut,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -234,6 +235,22 @@ export default function DoctorDashboard() {
     setMedicineSearch(e.target.value);
   };
 
+  const handleLogout = async () => {
+    console.log("Logout button clicked");
+    try {
+      const response = await fetch("/api/logout", {
+        method: "GET",
+      });
+      if (response.ok) {
+        window.location.href = "/";
+      } else {
+        console.error("Failed to log out");
+      }
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   // Mock data for doctors
   const doctors = [
     { id: 1, name: "Dr. James Wilson" },
@@ -423,6 +440,15 @@ export default function DoctorDashboard() {
             </Button>
             <Button variant="ghost" size="icon">
               <Settings className="h-5 w-5 text-gray-600" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-1" />
+              Logout
             </Button>
           </div>
         </div>
