@@ -179,6 +179,15 @@ export default function AdminDashboard() {
 
   const [status, setStatus] = useState("");
 
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [specialty, setSpecialty] = useState("");
+  const [password, setPassword] = useState("");
+  const [qualification, setQualification] = useState("");
+  const [availability, setAvailability] = useState<
+    { dayOfWeek: string; startTime: string; endTime: string }[]
+  >([{ dayOfWeek: "", startTime: "", endTime: "" }]);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -481,6 +490,52 @@ export default function AdminDashboard() {
     }
   };
 
+  function updateAvailability(index: number, field: string, value: string) {
+    const updated: any = [...availability];
+    updated[index][field] = value;
+    setAvailability(updated);
+  }
+
+  const resetForm = () => {
+    setName("");
+    setEmail("");
+    setSpecialty("");
+    setQualification("");
+    setPassword("");
+    setAvailability([{ dayOfWeek: "", startTime: "", endTime: "" }]);
+  };
+
+  const handleAddDoctor = async () => {
+    const payload = {
+      name,
+      email,
+      specialty,
+      qualification,
+      password,
+      availability,
+    };
+
+    console.log("Payload is: ", payload);
+
+    try {
+      const res = await fetch("/api/admin/add-doctor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Failed to add doctor");
+
+      alert("Doctor added successfully!");
+      resetForm();
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while adding the doctor");
+    }
+  };
+
   const formatDateTime = (dateString: string, timeString?: string) => {
     const date = new Date(dateString);
     const formattedDate = date.toLocaleDateString();
@@ -694,7 +749,11 @@ export default function AdminDashboard() {
                           <label className="text-sm font-medium text-slate-700">
                             Name
                           </label>
-                          <Input placeholder="Enter doctor's name" />
+                          <Input
+                            placeholder="Enter doctor's name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                          />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-slate-700">
@@ -703,54 +762,114 @@ export default function AdminDashboard() {
                           <Input
                             type="email"
                             placeholder="Enter doctor's email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                           />
                         </div>
                       </div>
+
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-slate-700">
                             Specialization
                           </label>
-                          <Select>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select specialization" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="general">
-                                General Medicine
-                              </SelectItem>
-                              <SelectItem value="ent">E.N.T</SelectItem>
-                              <SelectItem value="eye">
-                                Eye Specialist
-                              </SelectItem>
-                              <SelectItem value="cardiology">
-                                Cardiology
-                              </SelectItem>
-                              <SelectItem value="dermatology">
-                                Dermatology
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Input
+                            type="text"
+                            placeholder="Enter specialization"
+                            value={specialty}
+                            onChange={(e) => setSpecialty(e.target.value)}
+                          />
                         </div>
                         <div className="space-y-2">
                           <label className="text-sm font-medium text-slate-700">
-                            Phone
+                            Password
                           </label>
-                          <Input placeholder="Enter phone number" />
+                          <Input
+                            placeholder="Enter password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                          />
                         </div>
                       </div>
+
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700">
                           Qualification
                         </label>
-                        <Input placeholder="Enter doctor's qualification" />
+                        <Input
+                          placeholder="Enter doctor's qualification"
+                          value={qualification}
+                          onChange={(e) => setQualification(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700">
+                          Availability
+                        </label>
+
+                        {availability.map((slot, index) => (
+                          <div key={index} className="grid grid-cols-3 gap-2">
+                            <Input
+                              placeholder="Day (e.g., Monday)"
+                              value={slot.dayOfWeek}
+                              onChange={(e) =>
+                                updateAvailability(
+                                  index,
+                                  "dayOfWeek",
+                                  e.target.value
+                                )
+                              }
+                            />
+                            <Input
+                              placeholder="Start time (e.g., 09:00)"
+                              type="time"
+                              value={slot.startTime}
+                              onChange={(e) =>
+                                updateAvailability(
+                                  index,
+                                  "startTime",
+                                  e.target.value
+                                )
+                              }
+                            />
+                            <Input
+                              placeholder="End time (e.g., 17:00)"
+                              type="time"
+                              value={slot.endTime}
+                              onChange={(e) =>
+                                updateAvailability(
+                                  index,
+                                  "endTime",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </div>
+                        ))}
+
+                        <button
+                          type="button"
+                          className="text-sm text-cyan-600 hover:underline mt-1"
+                          onClick={() =>
+                            setAvailability([
+                              ...availability,
+                              { dayOfWeek: "", startTime: "", endTime: "" },
+                            ])
+                          }
+                        >
+                          + Add more availability
+                        </button>
                       </div>
                     </div>
                     <DialogFooter>
                       <Button variant="outline" className="text-slate-700">
                         Cancel
                       </Button>
-                      <Button className="bg-cyan-600 hover:bg-cyan-700">
+                      <Button
+                        className="bg-cyan-600 hover:bg-cyan-700"
+                        onClick={handleAddDoctor}
+                      >
                         Add Doctor
                       </Button>
                     </DialogFooter>

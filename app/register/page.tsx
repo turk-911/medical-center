@@ -190,14 +190,7 @@ const RegistrationForm = () => {
                 className="grid grid-cols-2 sm:grid-cols-3 gap-3"
                 onValueChange={(value) => handleSelectChange("role", value)}
               >
-                {[
-                  "resident",
-                  "doctor",
-                  "faculty",
-                  "staff",
-                  "student",
-                  "admin",
-                ].map((role) => (
+                {["resident", "faculty", "staff", "student"].map((role) => (
                   <div
                     key={role}
                     className="flex items-center space-x-2 bg-white p-2 rounded-md border border-gray-200 hover:bg-gray-100 transition-colors"
@@ -269,41 +262,6 @@ const RegistrationForm = () => {
             </>
           )}
 
-          {/* Fields for Doctor */}
-          {formData.role === "doctor" && (
-            <>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="specialty" className="text-gray-700">
-                    Specialty
-                  </Label>
-                  <Input
-                    id="specialty"
-                    name="specialty"
-                    placeholder="Enter your specialty"
-                    value={formData.specialty}
-                    onChange={handleChange}
-                    required
-                    className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-gray-700">
-                    Phone Number
-                  </Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    placeholder="Enter your phone number"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-              </div>
-            </>
-          )}
-
           {/* Fields for Faculty */}
           {formData.role === "faculty" && (
             <div className="space-y-2">
@@ -346,7 +304,7 @@ const RegistrationForm = () => {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="rollNo" className="text-gray-700">
-                    Roll Number
+                    Roll No.
                   </Label>
                   <Input
                     id="rollNo"
@@ -354,7 +312,6 @@ const RegistrationForm = () => {
                     placeholder="Enter your roll number"
                     value={formData.rollNo}
                     onChange={handleChange}
-                    required
                     className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
@@ -368,44 +325,16 @@ const RegistrationForm = () => {
                     placeholder="Enter your course"
                     value={formData.course}
                     onChange={handleChange}
-                    required
                     className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
                   />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dateOfBirth" className="text-gray-700">
-                  Date of Birth
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={handleChange}
-                    className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500 pl-10"
-                  />
-                  <Calendar className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
                 </div>
               </div>
             </>
           )}
 
-          <Button
-            type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 transition-all duration-200 shadow-md hover:shadow-lg"
-            onClick={handleSubmit}
-          >
+          <Button type="submit" className="w-full mt-6">
             Register
           </Button>
-
-          <div className="text-center text-sm text-gray-500">
-            Already have an account?{" "}
-            <a href="/login" className="text-indigo-600 hover:text-indigo-800">
-              Sign in
-            </a>
-          </div>
         </form>
       </div>
     </div>

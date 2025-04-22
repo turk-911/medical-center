@@ -63,6 +63,7 @@ model Doctor {
   specialty     String
   userId        Int            @unique
   availability  String         @default("Today")
+  status        String         @default("Available")
   image         String         @default("/api/placeholder/64/64")
   rating        Float          @default(4.8)
   Appointment   Appointment[]
