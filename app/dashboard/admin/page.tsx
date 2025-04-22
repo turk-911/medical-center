@@ -53,6 +53,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DoctorDetail } from "@/components/doctor-detail";
 
 // Types based on the actual API responses
 interface User {
@@ -178,31 +179,11 @@ export default function AdminDashboard() {
 
   const [status, setStatus] = useState("");
 
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const handleLogout = async () => {
-    console.log("Logout button clicked")
-    try {
-      const response = await fetch("/api/logout", {
-        method: "GET",
-      });
-      if (response.ok) {
-        window.location.href = "/";
-      } else {
-        console.error("Failed to log out");
-      }
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        // Set default active tab to "doctors" instead of "overview"
         setActiveTab("doctors");
 
         const doctorsRes = await fetch("/api/admin/doctors");
@@ -212,12 +193,24 @@ export default function AdminDashboard() {
         if (doctorsData.length > 0 && !selectedDoctorId) {
           setSelectedDoctorId(doctorsData[0].id);
         }
+
+        // Fetch doctor analytics data when selectedDoctorId changes
         if (selectedDoctorId) {
-          const analyticsRes = await fetch(
-            `/api/admin/analytics/${selectedDoctorId}`
-          );
-          const analyticsData: Doctor = await analyticsRes.json();
-          setDoctorAnalytics(analyticsData);
+          try {
+            const analyticsRes = await fetch(
+              `/api/admin/analytics/${selectedDoctorId}`
+            );
+            if (!analyticsRes.ok) {
+              throw new Error(
+                `Error fetching doctor analytics: ${analyticsRes.statusText}`
+              );
+            }
+            const analyticsData: Doctor = await analyticsRes.json();
+            console.log("Doctor analytics data:", analyticsData);
+            setDoctorAnalytics(analyticsData);
+          } catch (error) {
+            console.error("Error fetching doctor analytics:", error);
+          }
         }
 
         const medicines = await fetch("/api/admin/medicines");
@@ -329,6 +322,7 @@ export default function AdminDashboard() {
     });
   };
 
+  // Update the refreshData function to also refresh doctor analytics
   const refreshData = async () => {
     setIsRefreshing(true);
     try {
@@ -337,11 +331,20 @@ export default function AdminDashboard() {
       setDoctors(doctorsData);
 
       if (selectedDoctorId) {
-        const analyticsRes = await fetch(
-          `/api/admin/analytics/${selectedDoctorId}`
-        );
-        const analyticsData: Doctor = await analyticsRes.json();
-        setDoctorAnalytics(analyticsData);
+        try {
+          const analyticsRes = await fetch(
+            `/api/admin/analytics/${selectedDoctorId}`
+          );
+          if (!analyticsRes.ok) {
+            throw new Error(
+              `Error refreshing doctor analytics: ${analyticsRes.statusText}`
+            );
+          }
+          const analyticsData: Doctor = await analyticsRes.json();
+          setDoctorAnalytics(analyticsData);
+        } catch (error) {
+          console.error("Error refreshing doctor analytics:", error);
+        }
       }
 
       const appointmentsRes = await fetch("/api/admin/appointments");
@@ -394,7 +397,6 @@ export default function AdminDashboard() {
     return "Just now";
   };
 
-  // Filter doctors based on search term and filter type
   const filteredDoctors = doctors.filter((doctor) => {
     const matchesSearch = doctor.name
       .toLowerCase()
@@ -403,7 +405,6 @@ export default function AdminDashboard() {
     return matchesSearch && matchesFilter;
   });
 
-  // Filter appointments based on search term
   const filteredAppointments = appointments.filter((appointment) => {
     return (
       appointment.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -411,7 +412,6 @@ export default function AdminDashboard() {
     );
   });
 
-  // Filter medicines based on search term
   const filteredMedicines = medicines.filter((medicine) => {
     return (
       medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -431,7 +431,6 @@ export default function AdminDashboard() {
     );
   });
 
-  // Get status badge variant
   const getStatusBadge = (status: string) => {
     const normalizedStatus = status.toLowerCase();
     switch (normalizedStatus) {
@@ -449,7 +448,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Get doctor status based on availability
   const getDoctorStatus = (
     doctor: Doctor
   ): "active" | "on leave" | "unavailable" => {
@@ -457,7 +455,6 @@ export default function AdminDashboard() {
       return "unavailable";
     }
 
-    // Check if doctor has availability for today
     const today = new Date()
       .toLocaleDateString("en-US", { weekday: "long" })
       .toLowerCase();
@@ -468,7 +465,22 @@ export default function AdminDashboard() {
     return hasAvailabilityToday ? "active" : "on leave";
   };
 
-  // Format date and time
+  const handleLogout = async () => {
+    console.log("Logout button clicked");
+    try {
+      const response = await fetch("/api/logout", {
+        method: "GET",
+      });
+      if (response.ok) {
+        window.location.href = "/";
+      } else {
+        console.error("Failed to log out");
+      }
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
   const formatDateTime = (dateString: string, timeString?: string) => {
     const date = new Date(dateString);
     const formattedDate = date.toLocaleDateString();
@@ -477,7 +489,6 @@ export default function AdminDashboard() {
       return { date: formattedDate, time: timeString };
     }
 
-    // If no separate time string, extract time from date
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const ampm = hours >= 12 ? "PM" : "AM";
@@ -488,10 +499,8 @@ export default function AdminDashboard() {
     return { date: formattedDate, time: formattedTime };
   };
 
-  // Colors for pie chart
   const COLORS = ["#4f46e5", "#06b6d4", "#f59e0b", "#ef4444"];
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
@@ -817,6 +826,8 @@ export default function AdminDashboard() {
                                       src={
                                         doctor.user?.image ||
                                         "/placeholder.svg?height=40&width=40" ||
+                                        "/placeholder.svg" ||
+                                        "/placeholder.svg" ||
                                         "/placeholder.svg"
                                       }
                                       alt={doctor.name}
@@ -921,6 +932,11 @@ export default function AdminDashboard() {
                 </div>
               </CardFooter>
             </Card>
+            {selectedDoctorId && (
+              <div className="mt-6">
+                <DoctorDetail doctorId={selectedDoctorId} />
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="appointments" className="space-y-6">
@@ -1008,6 +1024,8 @@ export default function AdminDashboard() {
                                         src={
                                           appointment.user.image ||
                                           "/placeholder.svg?height=40&width=40" ||
+                                          "/placeholder.svg" ||
+                                          "/placeholder.svg" ||
                                           "/placeholder.svg"
                                         }
                                         alt={appointment.user.name}
