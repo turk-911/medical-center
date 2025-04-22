@@ -1648,7 +1648,7 @@ export default function AdminDashboard() {
                     size="sm"
                     className="text-slate-700 hover:bg-slate-100"
                   >
-                    Next
+                    Next  
                   </Button>
                 </div>
               </CardFooter>
