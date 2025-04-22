@@ -65,38 +65,38 @@ const RegistrationForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-   const handleSubmit = async (e) => {
-     e.preventDefault();
-     try {
-       const res = await fetch("/api/auth/register", {
-         method: "POST",
-         headers: {
-           "Content-Type": "application/json",
-         },
-         body: JSON.stringify(formData),
-       });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-       const result = await res.json();
+      const result = await res.json();
 
-       if (!res.ok) {
-         throw new Error(result.message || "Something went wrong");
-       }
+      if (!res.ok) {
+        throw new Error(result.message || "Something went wrong");
+      }
 
-       alert("Registration successful!");
-     } catch (error) {
-       console.error("Registration failed:", error);
-       alert("Registration failed: " + error.message);
-     }
-   };
+      alert("Registration successful!");
+    } catch (error) {
+      console.error("Registration failed:", error);
+      alert("Registration failed: " + error.message);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white relative px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-blue-50 text-gray-800 relative px-4 py-12">
       <style jsx global>{`
         .star {
           position: absolute;
           width: 2px;
           height: 2px;
-          background-color: white;
+          background-color: #6366f1;
           border-radius: 50%;
           opacity: 0;
           animation-name: twinkle;
@@ -118,24 +118,24 @@ const RegistrationForm = () => {
 
       <StarryBackground />
 
-      <div className="w-full max-w-2xl p-8 rounded-xl shadow-2xl bg-gray-900 bg-opacity-85 border border-gray-800 backdrop-blur-sm z-10">
+      <div className="w-full max-w-2xl p-8 rounded-xl shadow-lg bg-white border border-gray-200 backdrop-blur-sm z-10">
         <div className="flex items-center justify-center mb-8">
           <div className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse mr-1"></div>
           <div className="h-3 w-3 rounded-full bg-indigo-500 animate-pulse mr-1"></div>
           <div className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse"></div>
         </div>
 
-        <h2 className="text-3xl font-bold text-center text-white mb-2">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-2">
           User Registration
         </h2>
-        <p className="text-center text-gray-400 mb-8">
+        <p className="text-center text-gray-500 mb-8">
           Create your account to get started
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300">
+              <Label htmlFor="email" className="text-gray-700">
                 Email
               </Label>
               <Input
@@ -146,12 +146,12 @@ const RegistrationForm = () => {
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-gray-300">
+              <Label htmlFor="name" className="text-gray-700">
                 Full Name
               </Label>
               <Input
@@ -161,13 +161,13 @@ const RegistrationForm = () => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-gray-300">
+            <Label htmlFor="password" className="text-gray-700">
               Password
             </Label>
             <Input
@@ -178,13 +178,13 @@ const RegistrationForm = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
+              className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
 
           <div className="space-y-3">
-            <Label className="text-gray-300">Select User Type</Label>
-            <div className="p-4 rounded-lg bg-gray-800 bg-opacity-70">
+            <Label className="text-gray-700">Select User Type</Label>
+            <div className="p-4 rounded-lg bg-gray-50">
               <RadioGroup
                 defaultValue="resident"
                 className="grid grid-cols-2 sm:grid-cols-3 gap-3"
@@ -200,16 +200,16 @@ const RegistrationForm = () => {
                 ].map((role) => (
                   <div
                     key={role}
-                    className="flex items-center space-x-2 bg-gray-700 bg-opacity-40 p-2 rounded-md hover:bg-gray-600 transition-colors"
+                    className="flex items-center space-x-2 bg-white p-2 rounded-md border border-gray-200 hover:bg-gray-100 transition-colors"
                   >
                     <RadioGroupItem
                       value={role}
                       id={role}
-                      className="text-indigo-500"
+                      className="text-indigo-600"
                     />
                     <Label
                       htmlFor={role}
-                      className="text-gray-300 capitalize cursor-pointer"
+                      className="text-gray-700 capitalize cursor-pointer"
                     >
                       {role}
                     </Label>
@@ -224,7 +224,7 @@ const RegistrationForm = () => {
             <>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-gray-300">
+                  <Label htmlFor="phone" className="text-gray-700">
                     Phone Number
                   </Label>
                   <Input
@@ -233,11 +233,11 @@ const RegistrationForm = () => {
                     placeholder="Enter your phone number"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth" className="text-gray-300">
+                  <Label htmlFor="dateOfBirth" className="text-gray-700">
                     Date of Birth
                   </Label>
                   <div className="relative">
@@ -247,14 +247,14 @@ const RegistrationForm = () => {
                       type="date"
                       value={formData.dateOfBirth}
                       onChange={handleChange}
-                      className="bg-gray-800 border-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500 pl-10"
+                      className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500 pl-10"
                     />
-                    <Calendar className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                    <Calendar className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
                   </div>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address" className="text-gray-300">
+                <Label htmlFor="address" className="text-gray-700">
                   Address
                 </Label>
                 <Input
@@ -263,7 +263,7 @@ const RegistrationForm = () => {
                   placeholder="Enter your address"
                   value={formData.address}
                   onChange={handleChange}
-                  className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>
             </>
@@ -274,7 +274,7 @@ const RegistrationForm = () => {
             <>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="specialty" className="text-gray-300">
+                  <Label htmlFor="specialty" className="text-gray-700">
                     Specialty
                   </Label>
                   <Input
@@ -284,11 +284,11 @@ const RegistrationForm = () => {
                     value={formData.specialty}
                     onChange={handleChange}
                     required
-                    className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-gray-300">
+                  <Label htmlFor="phone" className="text-gray-700">
                     Phone Number
                   </Label>
                   <Input
@@ -297,7 +297,7 @@ const RegistrationForm = () => {
                     placeholder="Enter your phone number"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -307,7 +307,7 @@ const RegistrationForm = () => {
           {/* Fields for Faculty */}
           {formData.role === "faculty" && (
             <div className="space-y-2">
-              <Label htmlFor="dept" className="text-gray-300">
+              <Label htmlFor="dept" className="text-gray-700">
                 Department
               </Label>
               <Input
@@ -317,7 +317,7 @@ const RegistrationForm = () => {
                 value={formData.dept}
                 onChange={handleChange}
                 required
-                className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
           )}
@@ -325,7 +325,7 @@ const RegistrationForm = () => {
           {/* Fields for Staff */}
           {formData.role === "staff" && (
             <div className="space-y-2">
-              <Label htmlFor="section" className="text-gray-300">
+              <Label htmlFor="section" className="text-gray-700">
                 Section
               </Label>
               <Input
@@ -335,7 +335,7 @@ const RegistrationForm = () => {
                 value={formData.section}
                 onChange={handleChange}
                 required
-                className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
+                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
           )}
@@ -345,7 +345,7 @@ const RegistrationForm = () => {
             <>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="rollNo" className="text-gray-300">
+                  <Label htmlFor="rollNo" className="text-gray-700">
                     Roll Number
                   </Label>
                   <Input
@@ -355,11 +355,11 @@ const RegistrationForm = () => {
                     value={formData.rollNo}
                     onChange={handleChange}
                     required
-                    className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="course" className="text-gray-300">
+                  <Label htmlFor="course" className="text-gray-700">
                     Course
                   </Label>
                   <Input
@@ -369,12 +369,12 @@ const RegistrationForm = () => {
                     value={formData.course}
                     onChange={handleChange}
                     required
-                    className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="dateOfBirth" className="text-gray-300">
+                <Label htmlFor="dateOfBirth" className="text-gray-700">
                   Date of Birth
                 </Label>
                 <div className="relative">
@@ -384,9 +384,9 @@ const RegistrationForm = () => {
                     type="date"
                     value={formData.dateOfBirth}
                     onChange={handleChange}
-                    className="bg-gray-800 border-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500 pl-10"
+                    className="bg-gray-50 border-gray-200 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500 pl-10"
                   />
-                  <Calendar className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <Calendar className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
                 </div>
               </div>
             </>
@@ -394,15 +394,15 @@ const RegistrationForm = () => {
 
           <Button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 transition-all duration-200 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40"
+            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 transition-all duration-200 shadow-md hover:shadow-lg"
             onClick={handleSubmit}
           >
             Register
           </Button>
 
-          <div className="text-center text-sm text-gray-400">
+          <div className="text-center text-sm text-gray-500">
             Already have an account?{" "}
-            <a href="/login" className="text-indigo-400 hover:text-indigo-300">
+            <a href="/login" className="text-indigo-600 hover:text-indigo-800">
               Sign in
             </a>
           </div>

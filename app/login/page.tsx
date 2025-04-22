@@ -137,13 +137,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-black text-white relative">
+    <div className="flex h-screen items-center justify-center bg-blue-50 text-gray-900 relative">
       <style jsx global>{`
         .star {
           position: absolute;
           width: 2px;
           height: 2px;
-          background-color: white;
+          background-color: #6366f1;
           border-radius: 50%;
           opacity: 0;
           animation-name: twinkle;
@@ -165,12 +165,12 @@ export default function LoginPage() {
 
       <StarryBackground />
 
-      <Card className="w-full max-w-md bg-gray-900 border-gray-800 shadow-xl bg-opacity-90">
+      <Card className="w-full max-w-md bg-white border-gray-200 shadow-lg">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center text-white">
+          <CardTitle className="text-2xl font-bold text-center text-gray-800">
             Login
           </CardTitle>
-          <CardDescription className="text-gray-400 text-center">
+          <CardDescription className="text-gray-600 text-center">
             Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
@@ -178,28 +178,28 @@ export default function LoginPage() {
           {!showOtpForm ? (
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-gray-300">Email</Label>
+                <Label className="text-gray-700">Email</Label>
                 <Input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   required
-                  className="bg-gray-800 border-gray-700 text-white"
+                  className="bg-gray-50 border-gray-200 text-gray-800"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-gray-300">Password</Label>
+                <Label className="text-gray-700">Password</Label>
                 <Input
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   required
-                  className="bg-gray-800 border-gray-700 text-white"
+                  className="bg-gray-50 border-gray-200 text-gray-800"
                 />
               </div>
               <Button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? "Logging in..." : "Login"}
@@ -208,17 +208,17 @@ export default function LoginPage() {
           ) : (
             <form onSubmit={handleOtpVerify} className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-gray-300">OTP</Label>
+                <Label className="text-gray-700">OTP</Label>
                 <Input
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   required
-                  className="bg-gray-800 border-gray-700 text-white"
+                  className="bg-gray-50 border-gray-200 text-gray-800"
                 />
               </div>
               <Button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? "Verifying..." : "Verify OTP"}
@@ -227,11 +227,11 @@ export default function LoginPage() {
           )}
         </CardContent>
         <CardFooter className="justify-center">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-600">
             Don't have an account?{" "}
             <Link
               href="/register"
-              className="text-indigo-400 hover:text-indigo-300 hover:underline"
+              className="text-indigo-600 hover:text-indigo-800 hover:underline"
             >
               Register
             </Link>
