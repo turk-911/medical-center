@@ -2,15 +2,18 @@
   Warnings:
 
   - You are about to drop the `prescription` table. If the table is not empty, all the data it contains will be lost.
-
 */
--- DropForeignKey
+
+-- Drop Foreign Key Constraint from PrescriptionMedicine
+ALTER TABLE `PrescriptionMedicine` DROP FOREIGN KEY `PrescriptionMedicine_prescriptionId_fkey`;
+
+-- Drop Foreign Key Constraint from Prescription
 ALTER TABLE `prescription` DROP FOREIGN KEY `Prescription_appointmentId_fkey`;
 
--- DropTable
+-- Drop the `prescription` table
 DROP TABLE `prescription`;
 
--- CreateTable
+-- Create the new `Prescription` table with updated structure
 CREATE TABLE `Prescription` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `appointmentId` INTEGER NOT NULL,
@@ -22,8 +25,8 @@ CREATE TABLE `Prescription` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- AddForeignKey
+-- Re-add Foreign Key Constraint on `appointmentId` in `Prescription`
 ALTER TABLE `Prescription` ADD CONSTRAINT `Prescription_appointmentId_fkey` FOREIGN KEY (`appointmentId`) REFERENCES `Appointment`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- AddForeignKey
+-- Re-add Foreign Key Constraint on `prescriptionId` in `PrescriptionMedicine`
 ALTER TABLE `PrescriptionMedicine` ADD CONSTRAINT `PrescriptionMedicine_prescriptionId_fkey` FOREIGN KEY (`prescriptionId`) REFERENCES `Prescription`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

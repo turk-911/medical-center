@@ -14,7 +14,7 @@ export async function GET() {
     }
 
     const pendingLeaves = await prisma.onLeave.findMany({
-      where: { status: "pending" },
+      where: { status: "pending" }, 
       include: {
         doctor: { include: { user: true } },
         substitute: { include: { user: true } },

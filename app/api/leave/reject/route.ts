@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { sendMail } from '@/lib/mailer';
+import { sendEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
     const { leaveId } = await req.json();
@@ -14,11 +14,11 @@ export async function POST(req: Request) {
     await prisma.onLeave.delete({ where: { id: leaveId } });
 
     if (leave.doctor.user.email) {
-        await sendMail(
-            leave.doctor.user.email,
-            'Leave Rejected',
-            `Your leave request from ${leave.fromDate} to ${leave.toDate} has been rejected.`
-        );
+        await sendEmail({
+            to:leave.doctor.user.email,
+            subject:'Leave Rejected',
+            text:`Your leave request from ${leave.fromDate} to ${leave.toDate} has been rejected.`
+    });
     }
 
     return Response.json({ success: true });
