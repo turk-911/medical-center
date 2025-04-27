@@ -39,7 +39,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import PrescribeForm from "@/components/prescription-form";
 import { toast } from "sonner";
 
-
 export type Medicine = {
   expiryDate: React.ReactNode;
   id: number;
@@ -150,7 +149,10 @@ export default function DoctorDashboard() {
     setAppointmentsError(null);
 
     try {
-      const response = await fetch(`/api/appointments/${user.Doctor.id}`);
+      const response = await fetch(
+        `/api/appointments/doctorR?doctorId=${user.Doctor.id}`
+      );
+      console.log(user.Doctor.id);
       console.log("Fetching appointments for doctor ID:", user.Doctor.id);
 
       if (!response.ok) {
@@ -160,7 +162,7 @@ export default function DoctorDashboard() {
       const data = await response.json();
       console.log(data);
       setAppointments(data.appointments);
-    } catch (error : any) {
+    } catch (error: any) {
       console.error("Error fetching appointments:", error);
       setAppointmentsError(error.message);
     } finally {
@@ -182,7 +184,7 @@ export default function DoctorDashboard() {
       const data = await response.json();
       setMedicines(data);
       setFilteredMedicines(data);
-    } catch (error : any) {
+    } catch (error: any) {
       console.error("Error fetching medicines:", error);
       setMedicinesError(error.message);
     } finally {
@@ -196,6 +198,8 @@ export default function DoctorDashboard() {
     setIsSubmittingLeave(true);
 
     try {
+      console.log("sending");
+
       const response = await fetch("/api/leave/request", {
         method: "POST",
         headers: {
@@ -221,7 +225,7 @@ export default function DoctorDashboard() {
         endDate: "",
         substituteEmail: "",
       });
-    } catch (error : any) {
+    } catch (error: any) {
       console.error("Error submitting leave request:", error);
       toast.error(`Failed to submit leave request: ${error.message}`);
     } finally {
@@ -229,7 +233,7 @@ export default function DoctorDashboard() {
     }
   };
 
-  const handleMedicineSearch = (e : any) => {
+  const handleMedicineSearch = (e: any) => {
     setMedicineSearch(e.target.value);
   };
 

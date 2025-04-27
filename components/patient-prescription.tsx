@@ -38,17 +38,12 @@ type PrescriptionMedicine = {
   id: number;
   medicineId: number;
   prescriptionId: number;
-  dosage: string;
-  frequency: string;
-  duration: string;
-  instructions: string;
   medicine: Medicine;
 };
 
 type Prescription = {
   id: number;
   appointmentId: number;
-  diagnosis: string;
   notes: string;
   createdAt: string;
   updatedAt: string;
@@ -60,6 +55,10 @@ type Prescription = {
       specialization: string;
     };
   };
+  dosage: string;
+  frequency: string;
+  duration: string;
+  description: string;
   PrescriptionMedicine: PrescriptionMedicine[];
 };
 
@@ -103,6 +102,8 @@ export default function PatientPrescription() {
       }
 
       const data = await res.json();
+      console.log(data);
+
       setPrescriptions(data);
     } catch (error) {
       console.error("Error fetching prescriptions:", error);
@@ -242,14 +243,14 @@ export default function PatientPrescription() {
                 </CardHeader>
 
                 <CardContent className="pt-4">
-                  <div className="mb-4">
+                  {/* <div className="mb-4">
                     <h4 className="text-sm font-medium text-gray-500 mb-2">
                       Diagnosis
                     </h4>
                     <p className="text-gray-800 bg-gray-50 p-3 rounded-md border border-gray-100">
                       {prescription.diagnosis}
                     </p>
-                  </div>
+                  </div> */}
 
                   <div>
                     <h4 className="text-sm font-medium text-gray-500 mb-2">
@@ -274,31 +275,27 @@ export default function PatientPrescription() {
                             <div className="grid grid-cols-2 gap-3 text-sm">
                               <div>
                                 <p className="text-gray-500 mb-1">Dosage</p>
-                                <p className="font-medium">{med.dosage}</p>
+                                <p className="font-medium">
+                                  {prescription.dosage}
+                                </p>
                               </div>
                               <div>
                                 <p className="text-gray-500 mb-1">Frequency</p>
-                                <p className="font-medium">{med.frequency}</p>
+                                <p className="font-medium">
+                                  {prescription.frequency}
+                                </p>
                               </div>
                               <div>
                                 <p className="text-gray-500 mb-1">Duration</p>
-                                <p className="font-medium">{med.duration}</p>
+                                <p className="font-medium">
+                                  {prescription.duration}
+                                </p>
                               </div>
                             </div>
-                            {med.instructions && (
-                              <div className="mt-3 pt-3 border-t border-gray-100">
-                                <p className="text-gray-500 mb-1">
-                                  Instructions
-                                </p>
-                                <p className="text-gray-700">
-                                  {med.instructions}
-                                </p>
-                              </div>
-                            )}
                             <div className="mt-3 pt-3 border-t border-gray-100">
-                              <p className="text-gray-500 mb-1">Description</p>
+                              <p className="text-gray-500 mb-1">Diagnosis</p>
                               <p className="text-gray-700">
-                                {med.medicine.description}
+                                {prescription.description}
                               </p>
                             </div>
                           </AccordionContent>
@@ -320,18 +317,18 @@ export default function PatientPrescription() {
                 </CardContent>
 
                 <CardFooter className="bg-gray-50 border-t border-gray-200 flex justify-between">
-                  <Button variant="ghost" size="sm" className="text-gray-600">
-                    <FileText className="h-4 w-4 mr-2" />
-                    View Full Details
-                  </Button>
-                  <Button
+                  {/* <Button variant="ghost" size="sm" className="text-gray-600">
+                     <FileText className="h-4 w-4 mr-2" />
+                     View Full Details
+                  </Button> */}
+                  {/* <Button
                     variant="outline"
                     size="sm"
                     className="text-blue-600 border-blue-200 hover:bg-blue-50"
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Download PDF
-                  </Button>
+                  </Button> */}
                 </CardFooter>
               </Card>
             ))}

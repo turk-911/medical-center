@@ -15,15 +15,39 @@ import {
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 
-interface Appointment {
-  id: number
-  doctorName: string
-  specialization: string
-  date: string
-  time: string
-  status: string
-  reason?: string
-}
+// interface Appointment {
+//   id: number
+//   doctorName: string
+//   specialization: string
+//   date: string
+//   time: string
+//   status: string
+//   reason?: string
+// }
+
+
+type Appointment = {
+  id: number;
+  date: string; // ISO string from DateTime
+  timeSlot: string; // maps to `timeSlot`
+  status: "upcoming" | "completed" | "cancelled"; // explicitly typed
+  reason?: string | null; // maps to `description`
+  doctor: {
+    id: number;
+    name: string;
+    specialty: string;
+    image: string;
+    rating: number;
+    user: {
+      email: string;
+    };
+  };
+  user: {
+    id: number;
+    name?: string | null;
+    email: string;
+  };
+};
 
 interface AppointmentListProps {
   appointments: Appointment[]
@@ -37,6 +61,7 @@ export default function AppointmentList({ appointments, isLoading }: Appointment
     const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" }
     return new Date(dateString).toLocaleDateString(undefined, options)
   }
+console.log(appointments);
 
   const handleCancelAppointment = async (id: number) => {
     try {
@@ -45,7 +70,6 @@ export default function AppointmentList({ appointments, isLoading }: Appointment
       })
 
       if (response.ok) {
-        // Refresh appointments after cancellation
         window.location.reload()
       }
     } catch (error) {
@@ -95,7 +119,7 @@ export default function AppointmentList({ appointments, isLoading }: Appointment
           <CardContent className="p-4">
             <div className="flex flex-col space-y-3">
               <div className="flex justify-between items-start">
-                <h3 className="font-medium">{appointment.doctorName}</h3>
+                <h3 className="font-medium">{appointment.doctor.name}</h3>
                 <Badge variant={appointment.status === "upcoming" ? "default" : "outline"}>
                   {appointment.status === "upcoming" ? "Upcoming" : "Completed"}
                 </Badge>
@@ -104,7 +128,7 @@ export default function AppointmentList({ appointments, isLoading }: Appointment
               <div className="text-sm text-muted-foreground">
                 <span className="inline-flex items-center">
                   <User className="mr-1 h-3 w-3" />
-                  {appointment.specialization}
+                  {appointment.doctor.specialty}
                 </span>
               </div>
 
@@ -116,7 +140,7 @@ export default function AppointmentList({ appointments, isLoading }: Appointment
                   </span>
                   <span className="inline-flex items-center">
                     <Clock className="mr-1 h-3 w-3" />
-                    {appointment.time}
+                    {appointment.timeSlot}
                   </span>
                 </div>
 
@@ -136,16 +160,16 @@ export default function AppointmentList({ appointments, isLoading }: Appointment
                         <div className="space-y-4 py-4">
                           <div className="grid grid-cols-2 gap-2">
                             <div className="text-sm font-medium">Doctor:</div>
-                            <div className="text-sm">{selectedAppointment.doctorName}</div>
+                            <div className="text-sm">{selectedAppointment.doctor.name}</div>
 
                             <div className="text-sm font-medium">Specialization:</div>
-                            <div className="text-sm">{selectedAppointment.specialization}</div>
+                            <div className="text-sm">{selectedAppointment.doctor.specialty}</div>
 
                             <div className="text-sm font-medium">Date:</div>
                             <div className="text-sm">{formatDate(selectedAppointment.date)}</div>
 
                             <div className="text-sm font-medium">Time:</div>
-                            <div className="text-sm">{selectedAppointment.time}</div>
+                            <div className="text-sm">{selectedAppointment.timeSlot}</div>
 
                             <div className="text-sm font-medium">Status:</div>
                             <div className="text-sm">
@@ -161,12 +185,12 @@ export default function AppointmentList({ appointments, isLoading }: Appointment
                       )}
                     </DialogContent>
                   </Dialog>
-
+{/* 
                   {appointment.status === "upcoming" && (
-                    <Button variant="destructive" size="sm" onClick={() => handleCancelAppointment(appointment.id)}>
-                      Cancel
-                    </Button>
-                  )}
+                    // <Button variant="destructive" size="sm" onClick={() => handleCancelAppointment(appointment.id)}>
+                    //   Cancel
+                    // </Button>
+                  )} */}
                 </div>
               </div>
             </div>

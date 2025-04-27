@@ -28,21 +28,19 @@ export async function POST(req: NextRequest) {
 
     const parsedDate = parseISO(date);
     const doctorIdNum = typeof doctorId === "string" ? parseInt(doctorId) : doctorId;
+    
+    const existing = await prisma.appointment.findFirst({
+      where: {
+        doctorId: doctorIdNum,
+        date: parsedDate,
+        timeSlot,
+      },
+    });
 
-    // Check if slot is already booked
-    // const existing = await prisma.appointment.findFirst({
-    //   where: {
-    //     doctorId: doctorIdNum,
-    //     date: parsedDate,
-    //     timeSlot,
-    //   },
-    // });
+    if (existing) {
+      return NextResponse.json({ success: false, message: "Time slot already booked" }, { status: 409 });
+    }
 
-    // if (existing) {
-    //   return NextResponse.json({ success: false, message: "Time slot already booked" }, { status: 409 });
-    // }
-
-    // ✅ Create appointment using connect-by-id pattern
     const appointment = await prisma.appointment.create({
       data: {
         doctor: { connect: { id: doctorIdNum } },

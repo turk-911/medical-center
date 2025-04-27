@@ -5,22 +5,26 @@ import { sendEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
+    
     const userId = await getUserFromToken();
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-
+    
     const { startDate, endDate, substituteDoctorEmail } = await req.json();
-
+    
     const doctor = await prisma.doctor.findUnique({ where: { userId } });
     if (!doctor) {
       return NextResponse.json({ message: "Doctor not found" }, { status: 404 });
     }
-
+    
     const substituteUser = await prisma.user.findUnique({
       where: { email: substituteDoctorEmail },
     });
 
+    
+    
+    
     if (!substituteUser) {
       return NextResponse.json({ message: "Substitute doctor not found" }, { status: 404 });
     }

@@ -773,7 +773,7 @@ export default function AdminDashboard() {
           className="space-y-6"
         >
           <div className="bg-white rounded-lg p-2 mb-6 shadow-sm">
-            <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <TabsList className="grid grid-cols-2 md:grid-cols-5 gap-2">
               <TabsTrigger
                 value="doctors"
                 className="flex items-center gap-2 data-[state=active]:bg-cyan-50 data-[state=active]:text-cyan-700"

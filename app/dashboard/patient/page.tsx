@@ -30,14 +30,37 @@ import BookAppointment from "@/components/book-appointment";
 import { format, addMonths, subMonths } from "date-fns";
 import PatientPrescription from "@/components/patient-prescription";
 
+// type Appointment = {
+//   id: number;
+//   doctorName: string;
+//   specialization: string;
+//   date: string;
+//   time: string;
+//   status: string;
+//   reason?: string;
+// };
+
 type Appointment = {
   id: number;
-  doctorName: string;
-  specialization: string;
-  date: string;
-  time: string;
-  status: string;
-  reason?: string;
+  date: string; // ISO string from DateTime
+  timeSlot: string; // maps to `timeSlot`
+  status: "upcoming" | "completed" | "cancelled"; // explicitly typed
+  reason?: string | null; // maps to `description`
+  doctor: {
+    id: number;
+    name: string;
+    specialty: string;
+    image: string;
+    rating: number;
+    user: {
+      email: string;
+    };
+  };
+  user: {
+    id: number;
+    name?: string | null;
+    email: string;
+  };
 };
 
 type Doctor = {
@@ -68,6 +91,8 @@ export default function Dashboard() {
 
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
+  const [id, setId] = useState("");
+
   useEffect(() => {
     async function fetchDoctors() {
       try {
@@ -95,19 +120,27 @@ export default function Dashboard() {
           const data = await response.json();
           console.log("Patient", data.user);
           setUser(data.user);
+          console.log("d", data);
+
+          setId(data.user.id);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
 
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await fetch("/api/appointments/");
+        console.log(user);
+        const response = await fetch(`/api/appointments?userId=${id}`);
         if (response.ok) {
           const data = await response.json();
           console.log("Appointments: ", data);
-          setAppointments(data.appointments);
+          setAppointments(data);
         }
       } catch (error) {
         console.error("Error fetching appointments:", error);
@@ -116,10 +149,9 @@ export default function Dashboard() {
       }
     };
 
-    fetchUserData();
     fetchAppointments();
-  }, []);
-  
+  }, [user]);
+
   const handleLogout = async () => {
     console.log("Logout button clicked");
     try {
@@ -136,17 +168,18 @@ export default function Dashboard() {
     }
   };
 
-  const fetchAppointments = async () => {
-    try {
-      const response = await fetch("/api/appointments");
-      if (response.ok) {
-        const data = await response.json();
-        setAppointments(data.appointments);
-      }
-    } catch (error) {
-      console.error("Error fetching appointments:", error);
-    }
-  };
+  // const fetchAppointments = async () => {
+  //   try {
+  //     const response = await fetch(`/api/appointments/${id}`);
+  //     if (response.ok) {
+  //       const data = await response.json();
+
+  //       setAppointments(data.appointments);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching appointments:", error);
+  //   }
+  // };
 
   const handleDoctorSelect = (doctor: any) => {
     setSelectedDoctor(doctor);
@@ -170,7 +203,7 @@ export default function Dashboard() {
         throw new Error("Failed to book appointment");
       }
 
-      await fetchAppointments();
+      // await fetchAppointments();
     } catch (error) {
       console.error("Booking error:", error);
     }

@@ -1,50 +1,44 @@
-import { prisma } from "@/lib/db";
-import { NextResponse } from "next/server";
+import { prisma } from '@/lib/db';
 
-export async function GET(
-    req: Request,
-    { params }: { params: { id: string } }
-) {
-    const doctorId = parseInt(params.id);
-    console.log("Doctor ID:", doctorId);
-    console.log("Params ID:", params.id);
-
-    if (isNaN(doctorId)) {
-        return NextResponse.json({ message: "Invalid doctor ID" }, { status: 400 });
+export async function GET(req: Request) {
+    const { searchParams } = new URL(req.url);
+    
+    const userId = parseInt(searchParams.get('userId') || '');
+    
+    if (isNaN(userId)) {
+        return new Response(JSON.stringify({ error: 'Invalid or missing userId' }), { status: 400 });
     }
 
     try {
         const appointments = await prisma.appointment.findMany({
-            where: {
-                doctorId,  // Filter appointments by doctorId
-            },
+            where: { userId },
             include: {
-                user: {  // Include user info (patient information)
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        role: true,
+                doctor: {
+                    include: {
+                        user: true, // doctor’s user info (like name, email)
                     },
                 },
-                prescription: {  // Include prescription details if available
+                prescription: {
                     include: {
-                        PrescriptionMedicine: {  // Include associated medicines for the prescription
+                        PrescriptionMedicine: {
                             include: {
-                                medicine: true,  // Include medicine details (name, quantity, etc.)
+                                medicine: true,
                             },
                         },
                     },
                 },
             },
             orderBy: {
-                date: "asc",  // Order appointments by date in ascending order
+                date: 'asc',
             },
         });
-
-        return NextResponse.json({ appointments }, { status: 200 });
+        console.log("hello");
+        
+        console.log(appointments);
+        
+        return new Response(JSON.stringify(appointments), { status: 200 });
     } catch (error) {
-        console.error("❌ Error fetching appointments by doctor ID:", error);
-        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+        console.error('Error fetching appointments:', error);
+        return new Response(JSON.stringify({ error: 'Failed to fetch appointments' }), { status: 500 });
     }
 }

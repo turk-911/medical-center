@@ -77,7 +77,7 @@ export async function POST(request: Request) {
         dosage,
         duration,
         frequency,
-        medicines: {
+        PrescriptionMedicine: {
           create: medicineIds.map((medicineId, index) => ({
             medicineId,
             quantity: combinedQuantities[index],
