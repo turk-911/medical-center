@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const prescription = await prisma.prescription.findMany({
       where: { appointmentId },
       include: {
-        medicines: true,
+          PrescriptionMedicine: true,
       },
     });
 

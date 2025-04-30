@@ -24,14 +24,10 @@ interface Doctor {
 
 interface BookAppointmentProps {
   doctor: Doctor;
-  onComplete: () => void;
-  onCancel: () => void;
 }
 
 export default function BookAppointment({
   doctor,
-  onComplete,
-  onCancel,
 }: BookAppointmentProps) {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [timeSlot, setTimeSlot] = useState("");
@@ -97,7 +93,7 @@ export default function BookAppointment({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     if (!date || !timeSlot) {
       toast({
         variant: "destructive",
@@ -107,9 +103,11 @@ export default function BookAppointment({
       return;
     }
 
-    setIsSubmitting(true);
+    // setIsSubmitting(true);
+    const formattedDate = format(date, "yyyy-MM-dd");
 
     try {
+
       const response = await fetch("/api/appointments/book", {
         method: "POST",
         headers: {
@@ -118,14 +116,15 @@ export default function BookAppointment({
         credentials: "include",
         body: JSON.stringify({
           doctorId: doctor.id,
-          date: format(date, "yyyy-MM-dd"),
+          date: formattedDate,
           timeSlot,
           description: reason,
         }),
       });
-
+      console.log(response)
       if (!response.ok) {
         const errorData = await response.json();
+        alert(errorData.message);
         throw new Error(errorData.message || "Booking failed");
       }
 
@@ -137,7 +136,6 @@ export default function BookAppointment({
         )} at ${timeSlot} has been booked.`,
       });
 
-      onComplete();
     } catch (error) {
       toast({
         variant: "destructive",
@@ -155,7 +153,7 @@ export default function BookAppointment({
   return (
     <div className="space-y-6">
       <div className="flex items-center">
-        <Button variant="ghost" size="sm" onClick={onCancel} className="mr-2">
+        <Button variant="ghost" size="sm" className="mr-2">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back
         </Button>
@@ -217,8 +215,8 @@ export default function BookAppointment({
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableSlots.map((slot) => (
-                      <SelectItem key={slot} value={slot}>
+                    {availableSlots.map((slot, index) => (
+                      <SelectItem key={index} value={slot}>
                         {slot}
                       </SelectItem>
                     ))}

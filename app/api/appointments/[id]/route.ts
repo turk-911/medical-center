@@ -2,9 +2,9 @@ import { prisma } from '@/lib/db';
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
-    
+
     const userId = parseInt(searchParams.get('userId') || '');
-    
+
     if (isNaN(userId)) {
         return new Response(JSON.stringify({ error: 'Invalid or missing userId' }), { status: 400 });
     }
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
             include: {
                 doctor: {
                     include: {
-                        user: true, // doctor’s user info (like name, email)
+                        user: true,
                     },
                 },
                 prescription: {
@@ -32,10 +32,7 @@ export async function GET(req: Request) {
                 date: 'asc',
             },
         });
-        console.log("hello");
-        
-        console.log(appointments);
-        
+
         return new Response(JSON.stringify(appointments), { status: 200 });
     } catch (error) {
         console.error('Error fetching appointments:', error);

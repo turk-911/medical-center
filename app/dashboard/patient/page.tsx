@@ -29,51 +29,7 @@ import AppointmentList from "@/components/appointment-list";
 import BookAppointment from "@/components/book-appointment";
 import { format, addMonths, subMonths } from "date-fns";
 import PatientPrescription from "@/components/patient-prescription";
-
-// type Appointment = {
-//   id: number;
-//   doctorName: string;
-//   specialization: string;
-//   date: string;
-//   time: string;
-//   status: string;
-//   reason?: string;
-// };
-
-type Appointment = {
-  id: number;
-  date: string; // ISO string from DateTime
-  timeSlot: string; // maps to `timeSlot`
-  status: "upcoming" | "completed" | "cancelled"; // explicitly typed
-  reason?: string | null; // maps to `description`
-  doctor: {
-    id: number;
-    name: string;
-    specialty: string;
-    image: string;
-    rating: number;
-    user: {
-      email: string;
-    };
-  };
-  user: {
-    id: number;
-    name?: string | null;
-    email: string;
-  };
-};
-
-type Doctor = {
-  id: number;
-  name: string;
-  specialty: string;
-  rating?: number;
-  availability?: string;
-  image?: string;
-  user?: {
-    email: string;
-  };
-};
+import { Appointment, Doctor } from "@/app/types";
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
@@ -186,28 +142,28 @@ export default function Dashboard() {
     setShowBooking(true);
   };
 
-  const handleBookingComplete = async (appointmentData: any) => {
-    setShowBooking(false);
-    setSelectedDoctor(null);
+  // const handleBookingComplete = async (appointmentData: any) => {
+  //   setShowBooking(false);
+  //   setSelectedDoctor(null);
 
-    try {
-      const res = await fetch("/api/appointments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(appointmentData),
-      });
+  //   try {
+  //     const res = await fetch("/api/appointments", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(appointmentData),
+  //     });
 
-      if (!res.ok) {
-        throw new Error("Failed to book appointment");
-      }
+  //     if (!res.ok) {
+  //       throw new Error("Failed to book appointment");
+  //     }
 
-      // await fetchAppointments();
-    } catch (error) {
-      console.error("Booking error:", error);
-    }
-  };
+  //     // await fetchAppointments();
+  //   } catch (error) {
+  //     console.error("Booking error:", error);
+  //   }
+  // };
 
   const getDayWithAppointments = (date: Date) => {
     if (!appointments.length) return false;
@@ -403,8 +359,7 @@ export default function Dashboard() {
                     // Booking Form
                     <BookAppointment
                       doctor={selectedDoctor}
-                      onComplete={handleBookingComplete}
-                      onCancel={() => setShowBooking(false)}
+                      // onComplete={handleBookingComplete}
                     />
                   ) : (
                     // Doctor Search with Enhanced UI
@@ -656,7 +611,7 @@ export default function Dashboard() {
                       selectedDayAppointments.map((app) => (
                         <div
                           key={app.id}
-                          className="flex items-center justify-between text-sm p-3 border-l-4 border-blue-500 border border-gray-200 rounded-md bg-white hover:bg-blue-50 shadow-sm"
+                          className="flex items-center justify-between text-sm p-3 border-l-4 border-blue-500 border rounded-md bg-white hover:bg-blue-50 shadow-sm"
                         >
                           <div className="flex items-center space-x-3">
                             <div className="p-2 bg-blue-100 rounded-full">
@@ -664,16 +619,16 @@ export default function Dashboard() {
                             </div>
                             <div>
                               <div className="text-gray-800 font-medium">
-                                {app.doctorName}
+                                {app.doctor.name}
                               </div>
                               <div className="text-gray-500 text-xs">
-                                {app.specialization}
+                                {app.doctor.specialty}
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
                             <Clock className="mr-1 h-3 w-3" />
-                            {app.time}
+                            {app.timeSlot}
                           </div>
                         </div>
                       ))

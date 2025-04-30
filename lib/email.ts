@@ -1,5 +1,3 @@
-
-
 import nodemailer from "nodemailer"
 
 interface EmailOptions {
@@ -11,28 +9,27 @@ interface EmailOptions {
 
 export const sendEmail = async (options: EmailOptions) => {
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: false, 
+    port: 465,
+    service: "gmail",
     auth: {
-      user: "huddleverify@gmail.com", 
-      pass: "cbjyxuublcglegap",
+      user: process.env.SMTP_USER, // Use env variable
+      pass: process.env.SMTP_PASS, // Use env variable
     },
   })
 
   try {
     console.log("Preparing to send email to:", options.to)
-
-    const info = await transporter.sendMail({
-      from: `"Health Center" <${process.env.SMTP_USER}>`, // must be valid for Gmail
+    const mailOptions = {
+      from: `"Health Center" <${process.env.SMTP_USER}>`,
       to: options.to,
       subject: options.subject,
       text: options.text,
       html: options.html,
-    })
+    }
 
-    console.log("Email sent:", info.messageId)
-    return { success: true, messageId: info.messageId }
+    const emailResponse = await transporter.sendMail(mailOptions)
+    console.log("Email sent:", emailResponse.messageId)
+    return { success: true }
   } catch (error) {
     console.error("Error sending email:", error)
     return { success: false, error }

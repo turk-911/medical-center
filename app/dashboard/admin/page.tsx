@@ -54,137 +54,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DoctorDetail } from "@/components/doctor-detail";
-
-// Types based on the actual API responses
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  image?: string;
-}
-
-interface Doctor {
-  id: number;
-  name: string;
-  specialty: string;
-  bio?: string;
-  image?: string;
-  userId: number;
-  user?: User;
-  Availability?: Availability[];
-  _count?: {
-    Appointment: number;
-  };
-  Appointment?: AppointmentWithUser[];
-}
-
-interface Availability {
-  id: number;
-  doctorId: number;
-  day: string;
-  dayOfWeek: string;
-  startTime: string;
-  endTime: string;
-}
-
-interface AppointmentWithUser {
-  id: number;
-  date: string;
-  status: string;
-  user: {
-    name: string;
-    email: string;
-  };
-}
-
-interface Appointment {
-  id: number;
-  userId: number;
-  doctorId: number;
-  date: string;
-  time?: string;
-  status: string;
-  type?: string;
-  doctor: Doctor;
-  user: User;
-}
-
-interface Medicine {
-  id: number;
-  name: string;
-  quantity: number;
-  unit: string;
-  description?: string;
-  dosage?: string;
-  price?: number;
-  stock?: number;
-}
-
-interface PrescriptionMedicine {
-  id: number;
-  prescriptionId: number;
-  medicineId: number;
-  dosage: string;
-  duration: string;
-  medicine: Medicine;
-}
-
-interface Prescription {
-  id: number;
-  appointmentId: number;
-  notes?: string;
-  createdAt: string;
-  appointment: Appointment;
-  PrescriptionMedicine: PrescriptionMedicine[];
-}
-
-interface UserBasic {
-  email: string;
-}
-
-interface Doctor {
-  id: number;
-  name: string;
-  user: UserBasic;
-}
-
-interface Leave {
-  id: number;
-  fromDate: string; // Dates from backend are ISO strings
-  toDate: string;
-  doctorId: number;
-  substituteId: number;
-  doctor: Doctor;
-  substitute: Doctor;
-  status: "pending" | "approved" | "rejected";
-  reason: string;
-}
-
-// Dashboard analytics interface
-interface DashboardAnalytics {
-  totalResidents: number;
-  totalDoctors: number;
-  totalAppointments: number;
-  totalMedicines: number;
-  appointmentsByMonth: {
-    name: string;
-    count: number;
-  }[];
-  doctorPerformance: {
-    name: string;
-    appointments: number;
-  }[];
-  recentActivity: {
-    id: string;
-    type: string;
-    description: string;
-    time: string;
-  }[];
-  appointmentsByStatus: {
-    name: string;
-    value: number;
-  }[];
-}
+import { DashboardAnalytics, Prescription, Leave } from "@/app/types";
+import { Doctor, Appointment, Medicine } from "@/app/types/index";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("doctors");
@@ -217,12 +88,12 @@ export default function AdminDashboard() {
   const [medicineQuantity, setMedicineQuantity] = useState(0);
   const [medicineUnit, setMedicineUnit] = useState("");
   const [isAddingMedicine, setIsAddingMedicine] = useState(false);
+  const [leaves, setLeaves] = useState<Leave[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Set default active tab to "doctors" instead of "overview"
         setActiveTab("doctors");
 
         const doctorsRes = await fetch("/api/admin/doctors");
@@ -233,7 +104,6 @@ export default function AdminDashboard() {
           setSelectedDoctorId(doctorsData[0].id);
         }
 
-        // Fetch doctor analytics data when selectedDoctorId changes
         if (selectedDoctorId) {
           try {
             const analyticsRes = await fetch(
@@ -252,7 +122,6 @@ export default function AdminDashboard() {
           }
         }
 
-        // Fetch medicines from the API
         fetchMedicines();
 
         const appointmentsRes = await fetch("/api/admin/appointments");
@@ -325,7 +194,7 @@ export default function AdminDashboard() {
 
     const doctorPerformance = doctors.map((doctor) => ({
       name: doctor.name,
-      appointments: doctor._count?.Appointment || 0,
+      appointments: 0,
     }));
 
     const recentActivity = appointments
@@ -437,7 +306,7 @@ export default function AdminDashboard() {
   const filteredMedicines = medicines.filter((medicine) => {
     return (
       medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      medicine.description.toLowerCase().includes(searchTerm.toLowerCase())
+      medicine.unit.includes(searchTerm.toLowerCase())
     );
   });
 
@@ -458,7 +327,7 @@ export default function AdminDashboard() {
     switch (normalizedStatus) {
       case "active":
       case "scheduled":
-        return "success";
+        return "default";
       case "on leave":
       case "completed":
         return "secondary";
@@ -469,8 +338,6 @@ export default function AdminDashboard() {
         return "outline";
     }
   };
-
-  const [leaves, setLeaves] = useState<Leave[]>([]);
 
   useEffect(() => {
     const fetchLeaves = async () => {
@@ -607,11 +474,11 @@ export default function AdminDashboard() {
 
   const handleLeaveAction = async (
     leaveId: number,
-    action: "approve" | "reject"
+    action: "approved" | "rejected"
   ) => {
     try {
       const endpoint =
-        action === "approve" ? "/api/leave/approve" : "/api/leave/reject";
+        action === "approved" ? "/api/leave/approve" : "/api/leave/reject";
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -626,7 +493,7 @@ export default function AdminDashboard() {
           leave.id === leaveId
             ? {
                 ...leave,
-                status: action === "approve" ? "approved" : "rejected",
+                status: action === "approved" ? "approved" : "rejected",
               }
             : leave
         );
@@ -635,7 +502,7 @@ export default function AdminDashboard() {
         // Show success message
         alert(
           `Leave request ${
-            action === "approve" ? "approved" : "rejected"
+            action === "approved" ? "approved" : "rejected"
           } successfully`
         );
       } else {
@@ -1099,15 +966,7 @@ export default function AdminDashboard() {
                                   <Avatar>
                                     <AvatarImage
                                       src={
-                                        doctor.user?.image ||
-                                        "/placeholder.svg?height=40&width=40" ||
-                                        "/placeholder.svg" ||
-                                        "/placeholder.svg" ||
-                                        "/placeholder.svg" ||
-                                        "/placeholder.svg" ||
-                                        "/placeholder.svg" ||
-                                        "/placeholder.svg" ||
-                                        "/placeholder.svg"
+                                        "/placeholder.svg?height=40&width=40"
                                       }
                                       alt={doctor.name}
                                     />
@@ -1289,7 +1148,7 @@ export default function AdminDashboard() {
                           {filteredAppointments.map((appointment) => {
                             const { date, time } = formatDateTime(
                               appointment.date,
-                              appointment.time
+                              appointment.timeSlot
                             );
                             return (
                               <tr
@@ -1301,15 +1160,7 @@ export default function AdminDashboard() {
                                     <Avatar>
                                       <AvatarImage
                                         src={
-                                          appointment.user.image ||
-                                          "/placeholder.svg?height=40&width=40" ||
-                                          "/placeholder.svg" ||
-                                          "/placeholder.svg" ||
-                                          "/placeholder.svg" ||
-                                          "/placeholder.svg" ||
-                                          "/placeholder.svg" ||
-                                          "/placeholder.svg" ||
-                                          "/placeholder.svg"
+                                          "/placeholder.svg?height=40&width=40"
                                         }
                                         alt={appointment.user.name}
                                       />
@@ -1469,14 +1320,14 @@ export default function AdminDashboard() {
                                   "Unknown Doctor"}
                               </CardDescription>
                             </div>
-                            <Badge
+                            {/* <Badge
                               variant="outline"
                               className="bg-white text-slate-700"
                             >
                               {new Date(
-                                prescription.createdAt ?? Date.now()
+                                prescription. ?? Date.now()
                               ).toLocaleDateString()}
-                            </Badge>
+                            </Badge> */}
                           </div>
                         </CardHeader>
                         <CardContent className="pt-4">
@@ -1869,11 +1720,7 @@ export default function AdminDashboard() {
                                     <Avatar>
                                       <AvatarImage
                                         src={
-                                          leave.doctor.user?.image ||
-                                          "/placeholder.svg?height=40&width=40" ||
-                                          "/placeholder.svg" ||
-                                          "/placeholder.svg" ||
-                                          "/placeholder.svg"
+                                          "/placeholder.svg?height=40&width=40"
                                         }
                                         alt={leave.doctor.name}
                                       />
@@ -1896,11 +1743,7 @@ export default function AdminDashboard() {
                                     <Avatar>
                                       <AvatarImage
                                         src={
-                                          leave.substitute.user?.image ||
-                                          "/placeholder.svg?height=40&width=40" ||
-                                          "/placeholder.svg" ||
-                                          "/placeholder.svg" ||
-                                          "/placeholder.svg"
+                                          "/placeholder.svg?height=40&width=40"
                                         }
                                         alt={leave.substitute.name}
                                       />
@@ -1935,7 +1778,7 @@ export default function AdminDashboard() {
                                   <Badge
                                     variant={
                                       leave.status === "approved"
-                                        ? "success"
+                                        ? "default"
                                         : leave.status === "rejected"
                                         ? "destructive"
                                         : "outline"
@@ -1952,7 +1795,10 @@ export default function AdminDashboard() {
                                         variant="outline"
                                         size="sm"
                                         onClick={() =>
-                                          handleLeaveAction(leave.id, "approve")
+                                          handleLeaveAction(
+                                            leave.id,
+                                            "approved"
+                                          )
                                         }
                                         className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
                                       >
@@ -1962,7 +1808,10 @@ export default function AdminDashboard() {
                                         variant="outline"
                                         size="sm"
                                         onClick={() =>
-                                          handleLeaveAction(leave.id, "reject")
+                                          handleLeaveAction(
+                                            leave.id,
+                                            "rejected"
+                                          )
                                         }
                                         className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
                                       >

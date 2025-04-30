@@ -25,10 +25,12 @@ export async function POST(req: NextRequest) {
     if (!doctorId || !date || !timeSlot) {
       return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
     }
-
-    const parsedDate = parseISO(date);
-    const doctorIdNum = typeof doctorId === "string" ? parseInt(doctorId) : doctorId;
+    console.log(date);
     
+    const parsedDate = new Date(`${date}T00:00:00.000Z`);
+
+    const doctorIdNum = typeof doctorId === "string" ? parseInt(doctorId) : doctorId;
+
     const existing = await prisma.appointment.findFirst({
       where: {
         doctorId: doctorIdNum,

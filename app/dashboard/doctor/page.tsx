@@ -38,32 +38,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import PrescribeForm from "@/components/prescription-form";
 import { toast } from "sonner";
-
-export type Medicine = {
-  expiryDate: React.ReactNode;
-  id: number;
-  name: string;
-  quantity: number;
-  unit: string;
-  addedOn: string;
-  updatedOn: string;
-};
-
-interface Appointment {
-  patientName: React.ReactNode;
-  time: React.ReactNode;
-  id: number;
-  doctorId: number;
-  userId: number;
-  date: string;
-  timeSlot: string;
-  status: "upcoming" | "completed" | string;
-  description?: string;
-  doctor: {
-    name: string;
-    specialty: string;
-  };
-}
+import { Appointment, Medicine } from "@/app/types/index";
 
 export default function DoctorDashboard() {
   const [user, setUser] = useState<any>(null);
@@ -350,7 +325,7 @@ export default function DoctorDashboard() {
                       : ""
                   }
                 >
-                  {appointment.time}
+                  {appointment.timeSlot}
                 </Badge>
               </div>
 
@@ -673,9 +648,6 @@ export default function DoctorDashboard() {
                                   >
                                     {medicine.quantity}
                                   </Badge>
-                                </td>
-                                <td className="p-3 text-gray-800">
-                                  {medicine.expiryDate}
                                 </td>
                               </tr>
                             ))
